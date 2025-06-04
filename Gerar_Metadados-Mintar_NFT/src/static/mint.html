@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFT Minter com Análise de Sentimentos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin-top: 30px;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border: none;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #6e45e2, #88d3ce);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #6e45e2, #88d3ce);
+            border: none;
+            border-radius: 30px;
+            padding: 10px 20px;
+            font-weight: bold;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5d3bc4, #7ac4be);
+            transform: translateY(-2px);
+            transition: all 0.3s;
+        }
+        .preview-container {
+            width: 100%;
+            height: 300px;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .preview-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .status-indicator {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .status-connected {
+            background-color: #28a745;
+        }
+        .status-disconnected {
+            background-color: #dc3545;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+        .alert {
+            border-radius: 10px;
+        }
+        .form-control {
+            border-radius: 10px;
+        }
+        .form-label {
+            font-weight: 600;
+        }
+        .network-badge {
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            border-radius: 20px;
+            margin-left: 10px;
+        }
+        #debug-info {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            display: block;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .abi-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+        }
+        .abi-section textarea {
+            min-height: 150px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        .abi-format-help {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            font-size: 0.85rem;
+        }
+        .code-example {
+            background-color: #212529;
+            color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        /* Estilos para a sobreposição de instruções móveis */
+        #mobile-instructions-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: none; /* Oculto por padrão */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            z-index: 1000;
+        }
+        #mobile-instructions-overlay h2 {
+            margin-bottom: 20px;
+        }
+        #mobile-instructions-overlay p {
+            margin-bottom: 15px;
+        }
+        #mobile-instructions-overlay .btn {
+            margin-top: 20px;
+        }
+        /* Estilos para a seção de análise de sentimentos */
+        .analysis-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f8ff;
+            border-radius: 10px;
+            border-left: 5px solid #6e45e2;
+        }
+        .analysis-section h5 {
+            color: #6e45e2;
+            margin-bottom: 15px;
+        }
+        .analysis-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #ccc;
+        }
+        .analysis-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .analysis-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .analysis-content {
+            color: #555;
+            font-size: 0.95rem;
+        }
+        .keyword-badge {
+            display: inline-block;
+            background-color: #e9ecef;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 20px;
+            margin: 3px;
+            font-size: 0.8rem;
+        }
+        .attribute-badge {
+            display: inline-block;
+            background-color: #e2e3e5;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 20px;
+            margin: 3px;
+            font-size: 0.8rem;
+        }
+        .attribute-badge .trait-type {
+            font-weight: 600;
+        }
+    </style>
+    <!-- Carregando Ethers.js localmente -->
+    <script src="/static/js/ethers.min.js"></script>
+</head>
+<body>
+    <!-- Sobreposição para instruções móveis -->
+    <div id="mobile-instructions-overlay">
+        <h2>Atenção Usuário Mobile!</h2>
+        <p>Para usar este aplicativo com o MetaMask no seu celular, você precisa abri-lo no navegador interno do aplicativo MetaMask.</p>
+        <p><strong>Passos:</strong></p>
+        <ol style="text-align: left; display: inline-block;">
+            <li>Instale o aplicativo MetaMask (se ainda não tiver).</li>
+            <li>Abra o aplicativo MetaMask.</li>
+            <li>Toque no ícone de navegador dentro do MetaMask.</li>
+            <li>Digite ou cole o endereço deste site na barra de endereços do navegador do MetaMask.</li>
+        </ol>
+        <button id="open-in-metamask" class="btn btn-light">Abrir no MetaMask</button>
+        <button id="close-mobile-instructions" class="btn btn-secondary">Entendi, fechar</button>
+    </div>
+
+    <div class="container">
+        <h1 class="text-center mb-4">NFT Minter com Análise de Sentimentos</h1>
+        
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Status da Carteira</span>
+                <div>
+                    <span id="network-name" class="badge bg-secondary network-badge">Rede não detectada</span>
+                    <span id="wallet-status">
+                        <span class="status-indicator status-disconnected"></span>
+                        Desconectado
+                    </span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="mb-1">Endereço: <span id="wallet-address">Não conectado</span></p>
+                        <p class="mb-0">Saldo: <span id="wallet-balance">0</span> ETH</p>
+                    </div>
+                    <button id="connect-wallet" class="btn btn-primary">Conectar Carteira</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Criar NFT com Análise de Sentimentos</div>
+            <div class="card-body">
+                <div id="alerts-container"></div>
+                
+                <div class="mb-3">
+                    <label for="nft-image" class="form-label">Imagem do NFT</label>
+                    <input type="file" class="form-control" id="nft-image" accept="image/*">
+                </div>
+                
+                <div class="preview-container mb-3">
+                    <img id="image-preview" class="preview-image" src="" alt="Preview da imagem" style="display: none;">
+                    <p id="no-preview" class="text-muted">Nenhuma imagem selecionada</p>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="nft-name" class="form-label">Nome do NFT</label>
+                    <input type="text" class="form-control" id="nft-name" placeholder="Digite o nome do seu NFT">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="nft-description" class="form-label">Descrição Básica</label>
+                    <textarea class="form-control" id="nft-description" rows="3" placeholder="Descreva seu NFT (uma análise detalhada será gerada automaticamente)"></textarea>
+                </div>
+                
+                <!-- Seção de análise de sentimentos (inicialmente oculta) -->
+                <div id="analysis-section" class="analysis-section" style="display: none;">
+                    <h5>Análise de Sentimentos da Imagem</h5>
+                    
+                    <div class="analysis-item">
+                        <div class="analysis-title">Sentimentos Evocados</div>
+                        <div id="sentiment-analysis" class="analysis-content">Carregando análise...</div>
+                    </div>
+                    
+                    <div class="analysis-item">
+                        <div class="analysis-title">Psicologia das Cores</div>
+                        <div id="color-psychology" class="analysis-content">Carregando análise...</div>
+                    </div>
+                    
+                    <div class="analysis-item">
+                        <div class="analysis-title">Relação com Signos</div>
+                        <div id="zodiac-relation" class="analysis-content">Carregando análise...</div>
+                    </div>
+                    
+                    <div class="analysis-item">
+                        <div class="analysis-title">Linguagem Visual</div>
+                        <div id="visual-language" class="analysis-content">Carregando análise...</div>
+                    </div>
+                    
+                    <div class="analysis-item">
+                        <div class="analysis-title">Palavras-chave</div>
+                        <div id="keywords-container" class="d-flex flex-wrap"></div>
+                    </div>
+                    
+                    <div class="analysis-item">
+                        <div class="analysis-title">Atributos Gerados</div>
+                        <div id="attributes-container" class="d-flex flex-wrap"></div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="contract-address" class="form-label">Endereço do Contrato NFT</label>
+                    <input type="text" class="form-control" id="contract-address" placeholder="0x...">
+                    <small class="text-muted">Insira o endereço do contrato ERC-721 para mintar o NFT</small>
+                </div>
+                
+                <div class="abi-section">
+                    <label for="contract-abi" class="form-label">ABI do Contrato</label>
+                    <textarea class="form-control" id="contract-abi" rows="6" placeholder="Cole o ABI do seu contrato aqui (formato JSON)"></textarea>
+                    <small class="text-muted">Cole o ABI completo do seu contrato aqui. O ABI padrão inclui funções comuns como 'mint', 'safeMint' e 'mintNFT'.</small>
+                    
+                    <div class="abi-format-help">
+                        <h6>Formato correto do ABI:</h6>
+                        <p>O ABI deve ser um array JSON válido. Exemplo:</p>
+                        <div class="code-example">
+[
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "tokenURI",
+        "type": "string"
+      }
+    ],
+    "name": "mint",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]</div>
+                        <p>Observações importantes:</p>
+                        <ul>
+                            <li>O ABI deve começar com <code>[</code> e terminar com <code>]</code></li>
+                            <li>Use aspas duplas (<code>"</code>) para strings, não aspas simples</li>
+                            <li>Valores booleanos devem ser <code>true</code> ou <code>false</code> (minúsculas, sem aspas)</li>
+                            <li>Não use <code>True</code>, <code>False</code>, <code>'string'</code> ou outros formatos não-JSON</li>
+                        </ul>
+                        <button id="format-abi" class="btn btn-sm btn-outline-primary">Formatar ABI</button>
+                        <button id="reset-abi" class="btn btn-sm btn-outline-secondary ms-2">Restaurar ABI Padrão</button>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 mt-3">
+                    <button id="upload-btn" class="btn btn-primary">Fazer Upload e Analisar Imagem</button>
+                    <button id="mint-btn" class="btn btn-primary" disabled>Mintar NFT com Análise</button>
+                </div>
+                
+                <div id="loading" class="loading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                    <p id="loading-text" class="mt-2">Processando...</p>
+                </div>
+                
+                <div class="mt-3">
+                    <button id="toggle-debug" class="btn btn-sm btn-outline-secondary">Mostrar/Ocultar Informações de Depuração</button>
+                    <div id="debug-info"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4 text-center">
+            <p class="text-muted">Desenvolvido com ❤️ para entusiastas de NFT</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Função para detectar dispositivo móvel
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        // Função para verificar se está rodando dentro do navegador MetaMask
+        function isInsideMetaMaskBrowser() {
+            return typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask;
+        }
+
+        // Verificar se ethers está disponível
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof ethers === 'undefined') {
+                console.error('Ethers.js não foi carregado corretamente');
+                showAlert('Erro ao carregar a biblioteca Ethers.js. Por favor, recarregue a página.', 'danger');
+            } else {
+                console.log('Ethers.js carregado com sucesso:', ethers.version);
+                logDebug(`Ethers.js carregado com sucesso: versão ${ethers.version}`);
+            }
+
+            // Verificar se é mobile e não está no navegador MetaMask
+            if (isMobileDevice() && !isInsideMetaMaskBrowser()) {
+                logDebug('Dispositivo móvel detectado fora do navegador MetaMask. Exibindo instruções.');
+                document.getElementById('mobile-instructions-overlay').style.display = 'flex';
+            } else {
+                logDebug('Não é mobile ou está dentro do navegador MetaMask. Iniciando normalmente.');
+            }
+        });
+
+        // Variáveis globais
+        let currentAccount = null;
+        let imageIpfsHash = null;
+        let metadataIpfsHash = null;
+        let imageAnalysis = null;
+        
+        // ABI padrão (pode ser substituído pelo usuário)
+        const defaultNftAbi = [
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "to",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "tokenURI",
+                        "type": "string"
+                    }
+                ],
+                "name": "mint",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "to",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "tokenURI",
+                        "type": "string"
+                    }
+                ],
+                "name": "safeMint",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "recipient",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "tokenURI",
+                        "type": "string"
+                    }
+                ],
+                "name": "mintNFT",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            }
+        ];
+
+        // Elementos DOM
+        const connectWalletBtn = document.getElementById('connect-wallet');
+        const walletStatus = document.getElementById('wallet-status');
+        const walletAddress = document.getElementById('wallet-address');
+        const walletBalance = document.getElementById('wallet-balance');
+        const networkName = document.getElementById('network-name');
+        const imageInput = document.getElementById('nft-image');
+        const imagePreview = document.getElementById('image-preview');
+        const noPreview = document.getElementById('no-preview');
+        const uploadBtn = document.getElementById('upload-btn');
+        const mintBtn = document.getElementById('mint-btn');
+        const loading = document.getElementById('loading');
+        const loadingText = document.getElementById('loading-text');
+        const alertsContainer = document.getElementById('alerts-container');
+        const attributesContainer = document.getElementById('attributes-container');
+        const debugInfo = document.getElementById('debug-info');
+        const toggleDebugBtn = document.getElementById('toggle-debug');
+        const contractAbiInput = document.getElementById('contract-abi');
+        const contractAddressInput = document.getElementById('contract-address');
+        const formatAbiBtn = document.getElementById('format-abi');
+        const resetAbiBtn = document.getElementById('reset-abi');
+        const mobileInstructionsOverlay = document.getElementById('mobile-instructions-overlay');
+        const openInMetaMaskBtn = document.getElementById('open-in-metamask');
+        const closeMobileInstructionsBtn = document.getElementById('close-mobile-instructions');
+        const analysisSection = document.getElementById('analysis-section');
+        const sentimentAnalysis = document.getElementById('sentiment-analysis');
+        const colorPsychology = document.getElementById('color-psychology');
+        const zodiacRelation = document.getElementById('zodiac-relation');
+        const visualLanguage = document.getElementById('visual-language');
+        const keywordsContainer = document.getElementById('keywords-container');
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            logDebug('Página carregada, iniciando aplicação');
+            
+            // Preencher ABI padrão
+            contractAbiInput.value = JSON.stringify(defaultNftAbi, null, 2);
+            
+            // Configuração inicial do painel de depuração
+            toggleDebugBtn.addEventListener('click', () => {
+                debugInfo.style.display = debugInfo.style.display === 'none' ? 'block' : 'none';
+                logDebug('Painel de depuração ' + (debugInfo.style.display === 'none' ? 'ocultado' : 'exibido'));
+            });
+            
+            // Verificar se o MetaMask está instalado
+            checkMetaMaskInstallation();
+            
+            // Configurar event listeners
+            setupEventListeners();
+        });
+
+        function checkMetaMaskInstallation() {
+            logDebug('Verificando instalação do MetaMask...');
+            
+            if (typeof window.ethereum !== 'undefined') {
+                logDebug('MetaMask detectado!');
+                
+                // Verificar se já está conectado
+                checkExistingConnection();
+                
+                // Configurar eventos do MetaMask
+                setupMetaMaskEvents();
+            } else {
+                logDebug('MetaMask não encontrado!');
+                // Não mostra alerta se for mobile e fora do MM browser, pois já tem a sobreposição
+                if (!isMobileDevice()) {
+                    showAlert('MetaMask não encontrado! Por favor, instale a extensão MetaMask para usar este aplicativo.', 'danger');
+                }
+                connectWalletBtn.disabled = true;
+            }
+        }
+
+        async function checkExistingConnection() {
+            logDebug('Verificando conexão existente...');
+            
+            try {
+                // Método alternativo para verificar contas conectadas
+                const accounts = await window.ethereum.request({ 
+                    method: 'eth_accounts' 
+                });
+                
+                logDebug(`Contas encontradas: ${accounts.length > 0 ? accounts.join(', ') : 'nenhuma'}`);
+                
+                if (accounts.length > 0) {
+                    updateUIWithAccount(accounts[0]);
+                } else {
+                    logDebug('Nenhuma conta conectada previamente');
+                }
+            } catch (error) {
+                logDebug(`Erro ao verificar contas existentes: ${error.message}`);
+                console.error(error);
+            }
+        }
+
+        function setupMetaMaskEvents() {
+            logDebug('Configurando eventos do MetaMask');
+            
+            // Evento de mudança de contas
+            window.ethereum.on('accountsChanged', (accounts) => {
+                logDebug(`Evento accountsChanged detectado: ${accounts.join(', ')}`);
+                handleAccountsChanged(accounts);
+            });
+            
+            // Evento de mudança de rede
+            window.ethereum.on('chainChanged', (chainId) => {
+                logDebug(`Evento chainChanged detectado: ${chainId}`);
+                // Recarregar a página é a abordagem recomendada pela documentação do MetaMask
+                window.location.reload();
+            });
+            
+            // Evento de conexão
+            window.ethereum.on('connect', (connectInfo) => {
+                logDebug(`Evento connect detectado: ${JSON.stringify(connectInfo)}`);
+            });
+            
+            // Evento de desconexão
+            window.ethereum.on('disconnect', (error) => {
+                logDebug(`Evento disconnect detectado: ${error.message}`);
+                resetWalletUI();
+            });
+        }
+
+        function setupEventListeners() {
+            logDebug('Configurando event listeners da interface');
+            
+            // Botão de conexão da carteira
+            connectWalletBtn.addEventListener('click', connectWallet);
+            
+            // Input de imagem
+            imageInput.addEventListener('change', handleImageSelect);
+            
+            // Botão de upload
+            uploadBtn.addEventListener('click', uploadAndAnalyzeImage);
+            
+            // Botão de mint
+            mintBtn.addEventListener('click', mintNFT);
+            
+            // Botão de formatar ABI
+            formatAbiBtn.addEventListener('click', formatABI);
+            
+            // Botão de resetar ABI
+            resetAbiBtn.addEventListener('click', resetABI);
+
+            // Botões da sobreposição móvel
+            openInMetaMaskBtn.addEventListener('click', () => {
+                const currentUrl = window.location.href;
+                // Tenta abrir usando o deep link do MetaMask
+                window.location.href = `https://metamask.app.link/dapp/${currentUrl.replace(/^https?:\/\//, '')}`;
+                logDebug(`Tentando abrir no MetaMask: ${window.location.href}`);
+            });
+            closeMobileInstructionsBtn.addEventListener('click', () => {
+                mobileInstructionsOverlay.style.display = 'none';
+                logDebug('Instruções móveis fechadas pelo usuário.');
+            });
+        }
+
+        function formatABI() {
+            try {
+                // Tenta parsear o ABI atual
+                let abiText = contractAbiInput.value.trim();
+                
+                // Tenta corrigir problemas comuns
+                abiText = abiText
+                    .replace(/'/g, '"')  // Substitui aspas simples por aspas duplas
+                    .replace(/True/g, 'true')  // Corrige True para true
+                    .replace(/False/g, 'false');  // Corrige False para false
+                
+                // Tenta parsear o JSON
+                const abiObj = JSON.parse(abiText);
+                
+                // Formata o JSON com indentação
+                contractAbiInput.value = JSON.stringify(abiObj, null, 2);
+                
+                logDebug('ABI formatado com sucesso');
+                showAlert('ABI formatado com sucesso!', 'success');
+            } catch (error) {
+                logDebug(`Erro ao formatar ABI: ${error.message}`);
+                showAlert(`Erro ao formatar ABI: ${error.message}. Verifique o formato JSON.`, 'danger');
+            }
+        }
+
+        function resetABI() {
+            contractAbiInput.value = JSON.stringify(defaultNftAbi, null, 2);
+            logDebug('ABI resetado para o padrão');
+            showAlert('ABI restaurado para o padrão', 'info');
+        }
+
+        async function connectWallet() {
+            logDebug('Tentando conectar à carteira MetaMask...');
+            
+            try {
+                // Verificar se o MetaMask está instalado
+                if (typeof window.ethereum === 'undefined') {
+                    // Se for mobile, mostra a sobreposição de instruções
+                    if (isMobileDevice()) {
+                        mobileInstructionsOverlay.style.display = 'flex';
+                        logDebug('MetaMask não encontrado em dispositivo móvel. Exibindo instruções.');
+                    } else {
+                        throw new Error('MetaMask não está instalado');
+                    }
+                    return; // Impede a continuação se o MetaMask não estiver disponível
+                }
+                
+                // Solicitar acesso às contas
+                logDebug('Solicitando acesso às contas...');
+                const accounts = await window.ethereum.request({ 
+                    method: 'eth_requestAccounts' 
+                });
+                
+                logDebug(`Contas retornadas: ${accounts.join(', ')}`);
+                
+                if (accounts.length > 0) {
+                    updateUIWithAccount(accounts[0]);
+                } else {
+                    logDebug('Nenhuma conta retornada após solicitação');
+                    showAlert('Nenhuma conta selecionada no MetaMask', 'warning');
+                }
+            } catch (error) {
+                logDebug(`Erro ao conectar com MetaMask: ${error.message}`);
+                console.error(error);
+                showAlert('Erro ao conectar com MetaMask: ' + error.message, 'danger');
+            }
+        }
+
+        async function updateUIWithAccount(account) {
+            logDebug(`Atualizando UI com a conta: ${account}`);
+            
+            // Atualizar variável global
+            currentAccount = account;
+            
+            // Atualizar UI
+            walletStatus.innerHTML = '<span class="status-indicator status-connected"></span> Conectado';
+            walletAddress.textContent = `${account.substring(0, 6)}...${account.substring(38)}`;
+            connectWalletBtn.textContent = 'Carteira Conectada';
+            
+            // Obter e exibir saldo
+            await updateBalance(account);
+            
+            // Obter e exibir informações da rede
+            await updateNetworkInfo();
+        }
+
+        async function updateBalance(account) {
+            logDebug(`Obtendo saldo para a conta: ${account}`);
+            
+            try {
+                const balance = await window.ethereum.request({
+                    method: 'eth_getBalance',
+                    params: [account, 'latest']
+                });
+                
+                // Converter de wei para ether (1 ether = 10^18 wei)
+                const etherValue = parseInt(balance, 16) / Math.pow(10, 18);
+                const formattedBalance = etherValue.toFixed(4);
+                
+                walletBalance.textContent = formattedBalance;
+                logDebug(`Saldo obtido: ${formattedBalance} ETH`);
+            } catch (error) {
+                logDebug(`Erro ao obter saldo: ${error.message}`);
+                walletBalance.textContent = 'Erro';
+            }
+        }
+
+        async function updateNetworkInfo() {
+            logDebug('Obtendo informações da rede...');
+            
+            try {
+                const chainId = await window.ethereum.request({
+                    method: 'eth_chainId'
+                });
+                
+                // Converter de hex para decimal
+                const chainIdDecimal = parseInt(chainId, 16);
+                
+                logDebug(`Rede detectada: ID ${chainIdDecimal}`);
+                updateNetworkBadge(chainIdDecimal);
+            } catch (error) {
+                logDebug(`Erro ao obter informações da rede: ${error.message}`);
+                networkName.textContent = 'Erro ao detectar rede';
+                networkName.className = 'badge bg-danger network-badge';
+            }
+        }
+
+        function handleAccountsChanged(accounts) {
+            logDebug(`Mudança de contas detectada: ${accounts.length > 0 ? accounts.join(', ') : 'nenhuma'}`);
+            
+            if (accounts.length === 0) {
+                // MetaMask está desconectado
+                resetWalletUI();
+            } else if (accounts[0] !== currentAccount) {
+                // Conta mudou
+                updateUIWithAccount(accounts[0]);
+            }
+        }
+
+        function resetWalletUI() {
+            logDebug('Resetando UI da carteira');
+            
+            currentAccount = null;
+            walletStatus.innerHTML = '<span class="status-indicator status-disconnected"></span> Desconectado';
+            walletAddress.textContent = 'Não conectado';
+            walletBalance.textContent = '0';
+            connectWalletBtn.textContent = 'Conectar Carteira';
+            networkName.textContent = 'Rede não detectada';
+            networkName.className = 'badge bg-secondary network-badge';
+        }
+
+        function updateNetworkBadge(chainId) {
+            let networkText = 'Desconhecida';
+            let badgeClass = 'bg-secondary';
+            
+            switch(chainId) {
+                case 1:
+                    networkText = 'Ethereum Mainnet';
+                    badgeClass = 'bg-primary';
+                    break;
+                case 5:
+                    networkText = 'Goerli Testnet';
+                    badgeClass = 'bg-info';
+                    break;
+                case 11155111:
+                    networkText = 'Sepolia Testnet';
+                    badgeClass = 'bg-info';
+                    break;
+                case 137:
+                    networkText = 'Polygon';
+                    badgeClass = 'bg-purple';
+                    break;
+                case 80001:
+                    networkText = 'Mumbai Testnet';
+                    badgeClass = 'bg-info';
+                    break;
+                case 56:
+                    networkText = 'BSC';
+                    badgeClass = 'bg-warning';
+                    break;
+                case 97:
+                    networkText = 'BSC Testnet';
+                    badgeClass = 'bg-info';
+                    break;
+                default:
+                    networkText = `Rede ${chainId}`;
+                    break;
+            }
+            
+            networkName.textContent = networkText;
+            networkName.className = `badge ${badgeClass} network-badge`;
+            logDebug(`Badge de rede atualizado para: ${networkText}`);
+        }
+
+        function handleImageSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                logDebug(`Imagem selecionada: ${file.name}, tamanho: ${(file.size / 1024).toFixed(2)} KB, tipo: ${file.type}`);
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    noPreview.style.display = 'none';
+                    logDebug('Preview da imagem carregado');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.style.display = 'none';
+                noPreview.style.display = 'block';
+                logDebug('Nenhuma imagem selecionada');
+            }
+        }
+
+        async function uploadAndAnalyzeImage() {
+            if (!imageInput.files[0]) {
+                showAlert('Por favor, selecione uma imagem para upload.', 'warning');
+                logDebug('Tentativa de upload sem selecionar imagem');
+                return;
+            }
+            
+            const nftName = document.getElementById('nft-name').value;
+            const nftDescription = document.getElementById('nft-description').value;
+            
+            if (!nftName || !nftDescription) {
+                showAlert('Por favor, preencha o nome e a descrição básica do NFT.', 'warning');
+                logDebug('Tentativa de upload sem preencher nome ou descrição');
+                return;
+            }
+            
+            showLoading('Fazendo upload da imagem para o IPFS...');
+            logDebug('Iniciando upload para IPFS');
+            
+            try {
+                // Upload da imagem para o IPFS via Pinata
+                const formData = new FormData();
+                formData.append('file', imageInput.files[0]);
+                
+                logDebug('Enviando requisição para /api/upload');
+                const imageResponse = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const responseText = await imageResponse.text();
+                logDebug(`Resposta do servidor (status ${imageResponse.status}): ${responseText}`);
+                
+                if (!imageResponse.ok) {
+                    let errorData;
+                    try {
+                        errorData = JSON.parse(responseText);
+                    } catch (e) {
+                        errorData = { error: 'Erro ao processar resposta do servidor' };
+                    }
+                    throw new Error(errorData.error || 'Erro ao fazer upload da imagem');
+                }
+                
+                const imageData = JSON.parse(responseText);
+                imageIpfsHash = imageData.IpfsHash;
+                logDebug(`Hash IPFS da imagem: ${imageIpfsHash}`);
+                
+                // Agora que temos o hash IPFS, vamos analisar a imagem
+                showLoading('Analisando imagem com IA...');
+                
+                logDebug('Enviando requisição para /api/analyze-image');
+                const analysisResponse = await fetch('/api/analyze-image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        image_hash: imageIpfsHash
+                    })
+                });
+                
+                const analysisResponseText = await analysisResponse.text();
+                logDebug(`Resposta da análise (status ${analysisResponse.status}): ${analysisResponseText.substring(0, 200)}...`);
+                
+                if (!analysisResponse.ok) {
+                    let errorData;
+                    try {
+                        errorData = JSON.parse(analysisResponseText);
+                    } catch (e) {
+                        errorData = { error: 'Erro ao processar resposta da análise' };
+                    }
+                    throw new Error(errorData.error || 'Erro ao analisar imagem');
+                }
+                
+                // Armazena a análise e atualiza a UI
+                imageAnalysis = JSON.parse(analysisResponseText);
+                updateAnalysisUI(imageAnalysis);
+                
+                // Habilita o botão de mint
+                mintBtn.disabled = false;
+                hideLoading();
+                showAlert('Imagem analisada com sucesso! Agora você pode mintar seu NFT com análise de sentimentos.', 'success');
+                
+            } catch (error) {
+                hideLoading();
+                console.error('Erro:', error);
+                logDebug(`Erro durante upload ou análise: ${error.message}`);
+                showAlert('Erro: ' + error.message, 'danger');
+            }
+        }
+
+        function updateAnalysisUI(analysis) {
+            logDebug('Atualizando UI com a análise da imagem');
+            
+            // Exibe a seção de análise
+            analysisSection.style.display = 'block';
+            
+            // Preenche os campos de análise
+            sentimentAnalysis.textContent = analysis.sentiment_analysis || 'Não disponível';
+            colorPsychology.textContent = analysis.color_psychology || 'Não disponível';
+            zodiacRelation.textContent = analysis.zodiac_relation || 'Não disponível';
+            visualLanguage.textContent = analysis.visual_language || 'Não disponível';
+            
+            // Limpa e preenche as palavras-chave
+            keywordsContainer.innerHTML = '';
+            if (analysis.keywords && analysis.keywords.length > 0) {
+                analysis.keywords.forEach(keyword => {
+                    const keywordBadge = document.createElement('span');
+                    keywordBadge.className = 'keyword-badge';
+                    keywordBadge.textContent = keyword;
+                    keywordsContainer.appendChild(keywordBadge);
+                });
+            } else {
+                keywordsContainer.textContent = 'Nenhuma palavra-chave disponível';
+            }
+            
+            // Limpa e preenche os atributos
+            attributesContainer.innerHTML = '';
+            if (analysis.attributes && analysis.attributes.length > 0) {
+                analysis.attributes.forEach(attr => {
+                    const attrBadge = document.createElement('span');
+                    attrBadge.className = 'attribute-badge';
+                    attrBadge.innerHTML = `<span class="trait-type">${attr.trait_type}:</span> ${attr.value}`;
+                    attributesContainer.appendChild(attrBadge);
+                });
+            } else {
+                attributesContainer.textContent = 'Nenhum atributo disponível';
+            }
+            
+            logDebug('UI de análise atualizada com sucesso');
+        }
+
+        async function mintNFT() {
+            if (!currentAccount) {
+                showAlert('Por favor, conecte sua carteira MetaMask primeiro.', 'warning');
+                logDebug('Tentativa de mint sem carteira conectada');
+                return;
+            }
+            
+            if (!imageIpfsHash || !imageAnalysis) {
+                showAlert('Por favor, faça o upload e análise da imagem primeiro.', 'warning');
+                logDebug('Tentativa de mint sem hash de imagem ou análise');
+                return;
+            }
+            
+            const contractAddress = contractAddressInput.value;
+            if (!isValidAddress(contractAddress)) {
+                showAlert('Por favor, insira um endereço de contrato válido.', 'warning');
+                logDebug(`Endereço de contrato inválido: ${contractAddress}`);
+                return;
+            }
+            
+            // Verificar se ethers está disponível
+            if (typeof ethers === 'undefined') {
+                showAlert('Biblioteca Ethers.js não carregada. Por favor, recarregue a página.', 'danger');
+                logDebug('Ethers.js não está disponível para mintagem');
+                return;
+            }
+            
+            let contractAbi;
+            try {
+                // Tenta parsear o ABI, corrigindo problemas comuns
+                let abiText = contractAbiInput.value.trim();
+                
+                // Tenta corrigir problemas comuns
+                abiText = abiText
+                    .replace(/'/g, '"')  // Substitui aspas simples por aspas duplas
+                    .replace(/True/g, 'true')  // Corrige True para true
+                    .replace(/False/g, 'false');  // Corrige False para false
+                
+                contractAbi = JSON.parse(abiText);
+                if (!Array.isArray(contractAbi)) {
+                    throw new Error('ABI inválido, não é um array JSON');
+                }
+                logDebug('ABI do contrato lido com sucesso');
+            } catch (error) {
+                showAlert('Erro ao ler o ABI do contrato. Verifique o formato JSON.', 'danger');
+                logDebug(`Erro ao parsear ABI: ${error.message}`);
+                return;
+            }
+            
+            showLoading('Criando metadados enriquecidos...');
+            
+            try {
+                // Obter os valores dos campos
+                const nftName = document.getElementById('nft-name').value;
+                const nftDescription = document.getElementById('nft-description').value;
+                
+                // Criar metadados com a análise
+                logDebug('Enviando requisição para /api/create-metadata com análise');
+                const metadataResponse = await fetch('/api/create-metadata', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: nftName,
+                        description: nftDescription,
+                        image: imageIpfsHash,
+                        image_analysis: imageAnalysis
+                    })
+                });
+                
+                const metadataResponseText = await metadataResponse.text();
+                logDebug(`Resposta do servidor para metadados (status ${metadataResponse.status}): ${metadataResponseText}`);
+                
+                if (!metadataResponse.ok) {
+                    let errorData;
+                    try {
+                        errorData = JSON.parse(metadataResponseText);
+                    } catch (e) {
+                        errorData = { error: 'Erro ao processar resposta do servidor para metadados' };
+                    }
+                    throw new Error(errorData.error || 'Erro ao criar metadados');
+                }
+                
+                const metadataData = JSON.parse(metadataResponseText);
+                metadataIpfsHash = metadataData.IpfsHash;
+                logDebug(`Hash IPFS dos metadados: ${metadataIpfsHash}`);
+                
+                // Agora vamos mintar o NFT
+                showLoading('Mintando NFT com análise de sentimentos...');
+                
+                // Usar o formato https://ipfs.io/ipfs/ para o tokenURI
+                const tokenURI = `https://ipfs.io/ipfs/${metadataIpfsHash}`;
+                logDebug(`Iniciando mint para contrato: ${contractAddress}, tokenURI: ${tokenURI}`);
+                
+                // Tenta diferentes funções de mint que podem existir no contrato
+                let txHash;
+                const mintFunctions = ['mint', 'safeMint', 'mintNFT'];
+                let functionFound = false;
+                
+                for (const funcName of mintFunctions) {
+                    logDebug(`Tentando função ${funcName}()`);
+                    try {
+                        // Passar o tokenURI correto (https://...) para a função
+                        txHash = await callContractMethod(contractAddress, contractAbi, funcName, [currentAccount, tokenURI]);
+                        functionFound = true;
+                        logDebug(`Função ${funcName}() encontrada e chamada com sucesso.`);
+                        break; // Sai do loop se a função for encontrada e chamada
+                    } catch (e) {
+                        logDebug(`Erro na função ${funcName}(): ${e.message}`);
+                        // Continua tentando a próxima função
+                    }
+                }
+                
+                if (!functionFound) {
+                    throw new Error('Nenhuma função de mint (mint, safeMint, mintNFT) encontrada ou falhou ao chamar.');
+                }
+                
+                logDebug(`Transação enviada: ${txHash}`);
+                showLoading('Transação enviada! Aguardando confirmação...');
+                
+                // Aguarda a confirmação da transação
+                const receipt = await waitForTransaction(txHash);
+                logDebug(`Transação confirmada: ${JSON.stringify(receipt)}`);
+                
+                hideLoading();
+                showAlert(`NFT mintado com sucesso! Seu NFT agora inclui uma análise detalhada de sentimentos, psicologia das cores e signos. Hash da transação: ${txHash}`, 'success');
+                
+            } catch (error) {
+                hideLoading();
+                console.error('Erro ao mintar NFT:', error);
+                logDebug(`Erro ao mintar NFT: ${error.message || error}`);
+                showAlert('Erro ao mintar NFT: ' + (error.message || error), 'danger');
+            }
+        }
+
+        async function callContractMethod(contractAddress, contractAbi, methodName, params) {
+            // Verificar se ethers.js está disponível
+            if (typeof ethers === 'undefined') {
+                throw new Error('Biblioteca Ethers.js não carregada. Necessária para codificação ABI.');
+            }
+            
+            // Criar uma interface do contrato usando ethers.js para codificar os dados
+            const contractInterface = new ethers.utils.Interface(contractAbi);
+            
+            // Codificar os dados da chamada usando a interface
+            let encodedData;
+            try {
+                encodedData = contractInterface.encodeFunctionData(methodName, params);
+                logDebug(`Dados codificados para ${methodName}: ${encodedData}`);
+            } catch (error) {
+                logDebug(`Erro ao codificar dados para ${methodName} com params ${JSON.stringify(params)}: ${error.message}`);
+                throw new Error(`Erro ao codificar dados para a função ${methodName}: ${error.message}`);
+            }
+            
+            // Enviar a transação usando a API do MetaMask
+            logDebug(`Enviando transação para ${contractAddress} com dados: ${encodedData}`);
+            const txHash = await window.ethereum.request({
+                method: 'eth_sendTransaction',
+                params: [{
+                    from: currentAccount,
+                    to: contractAddress,
+                    data: encodedData
+                    // MetaMask calculará gas automaticamente
+                }]
+            });
+            
+            return txHash;
+        }
+
+        async function waitForTransaction(txHash) {
+            logDebug(`Aguardando confirmação da transação: ${txHash}`);
+            return new Promise((resolve, reject) => {
+                const checkReceipt = async () => {
+                    try {
+                        const receipt = await window.ethereum.request({
+                            method: 'eth_getTransactionReceipt',
+                            params: [txHash]
+                        });
+                        
+                        if (receipt) {
+                            logDebug(`Recibo da transação obtido: ${JSON.stringify(receipt)}`);
+                            if (receipt.status === '0x1') {
+                                resolve(receipt);
+                            } else {
+                                logDebug(`Transação falhou (status: ${receipt.status})`);
+                                reject(new Error('Transação falhou. Verifique o status no explorador de blocos.'));
+                            }
+                        } else {
+                            logDebug('Recibo ainda não disponível, tentando novamente em 2s...');
+                            setTimeout(checkReceipt, 2000);
+                        }
+                    } catch (error) {
+                        logDebug(`Erro ao obter recibo da transação: ${error.message}`);
+                        reject(error);
+                    }
+                };
+                
+                checkReceipt();
+            });
+        }
+
+        function isValidAddress(address) {
+            // Verificação básica de endereço Ethereum
+            return /^0x[a-fA-F0-9]{40}$/.test(address);
+        }
+
+        function showLoading(message) {
+            loading.style.display = 'block';
+            loadingText.textContent = message || 'Processando...';
+            uploadBtn.disabled = true;
+            mintBtn.disabled = true;
+            logDebug(`Loading exibido: ${message}`);
+        }
+
+        function hideLoading() {
+            loading.style.display = 'none';
+            uploadBtn.disabled = false;
+            mintBtn.disabled = imageIpfsHash && imageAnalysis ? false : true;
+            logDebug('Loading ocultado');
+        }
+
+        function showAlert(message, type) {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+            `;
+            
+            alertsContainer.appendChild(alert);
+            logDebug(`Alerta exibido (${type}): ${message}`);
+            
+            // Remove o alerta após 5 segundos
+            setTimeout(() => {
+                alert.classList.remove('show');
+                setTimeout(() => {
+                    if (alertsContainer.contains(alert)) {
+                        alertsContainer.removeChild(alert);
+                        logDebug('Alerta removido');
+                    }
+                }, 150);
+            }, 5000);
+        }
+        
+        function logDebug(message) {
+            const timestamp = new Date().toISOString();
+            console.log(`[DEBUG] ${timestamp}: ${message}`);
+            
+            const logEntry = document.createElement('div');
+            logEntry.textContent = `${timestamp}: ${message}`;
+            // Adiciona no início para ver os logs mais recentes primeiro
+            debugInfo.insertBefore(logEntry, debugInfo.firstChild);
+            
+            // Limita o número de entradas de log para evitar sobrecarga
+            while (debugInfo.children.length > 100) {
+                debugInfo.removeChild(debugInfo.lastChild);
+            }
+        }
+    </script>
+</body>
+</html>

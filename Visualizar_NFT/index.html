@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFT Minter - Traga Emoção ao Blockchain</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --dark-blue: #0f0b2a;
+            --medium-blue: #1a1642;
+            --light-blue: #4e9fff;
+            --purple: #8a56ff;
+            --cyan: #56d6ff;
+            --pink: #ff56d6;
+            --orange: #ff8a56;
+            --yellow: #ffdd56;
+        }
+        
+        body {
+            background-color: var(--dark-blue);
+            color: white;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+        
+        .navbar {
+            background-color: var(--dark-blue) !important;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: white !important;
+            display: flex;
+            align-items: center;
+        }
+        
+        .navbar-brand i {
+            color: var(--cyan);
+            margin-right: 10px;
+            font-size: 1.8rem;
+        }
+        
+        .navbar-dark .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+            padding: 10px 15px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .navbar-dark .navbar-nav .nav-link:hover,
+        .navbar-dark .navbar-nav .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn-connect {
+            background: linear-gradient(90deg, var(--cyan), var(--light-blue));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-connect:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(86, 214, 255, 0.3);
+        }
+        
+        .hero-section {
+            padding: 100px 0 80px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--purple), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.5rem;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(90deg, var(--purple), var(--cyan));
+            border: none;
+            border-radius: 8px;
+            padding: 15px 30px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(138, 86, 255, 0.3);
+        }
+        
+        .feature-section {
+            padding: 80px 0;
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--purple), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+        
+        .section-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 50px;
+        }
+        
+        .feature-card {
+            background-color: var(--medium-blue);
+            border-radius: 16px;
+            padding: 30px;
+            height: 100%;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-color: rgba(138, 86, 255, 0.3);
+        }
+        
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+        
+        .icon-upload {
+            background: linear-gradient(135deg, var(--purple), var(--pink));
+            color: white;
+        }
+        
+        .icon-storage {
+            background: linear-gradient(135deg, var(--cyan), var(--light-blue));
+            color: white;
+        }
+        
+        .icon-mint {
+            background: linear-gradient(135deg, var(--orange), var(--yellow));
+            color: white;
+        }
+        
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: white;
+        }
+        
+        .feature-text {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+        }
+        
+        .benefits-section {
+            padding: 80px 0;
+            background-color: rgba(26, 22, 66, 0.5);
+            border-radius: 30px;
+            margin: 0 20px;
+        }
+        
+        .benefit-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .benefit-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        .icon-ai {
+            background: linear-gradient(135deg, var(--purple), var(--pink));
+            color: white;
+        }
+        
+        .icon-security {
+            background: linear-gradient(135deg, var(--cyan), var(--light-blue));
+            color: white;
+        }
+        
+        .icon-metadata {
+            background: linear-gradient(135deg, var(--yellow), var(--orange));
+            color: white;
+        }
+        
+        .icon-tracking {
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            color: white;
+        }
+        
+        .icon-opensource {
+            background: linear-gradient(135deg, var(--light-blue), var(--cyan));
+            color: white;
+        }
+        
+        .icon-fast {
+            background: linear-gradient(135deg, var(--orange), var(--yellow));
+            color: white;
+        }
+        
+        .benefit-content h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .benefit-content p {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0;
+        }
+        
+        .cta-section {
+            padding: 100px 0;
+            text-align: center;
+            background-color: var(--medium-blue);
+            border-radius: 30px;
+            margin: 80px 20px 0;
+        }
+        
+        .cta-title {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--purple), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+        
+        .cta-text {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 700px;
+            margin: 0 auto 40px;
+        }
+        
+        .footer {
+            background-color: var(--dark-blue);
+            padding: 50px 0 30px;
+            margin-top: 80px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .footer-links h4 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: white;
+        }
+        
+        .footer-links ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: var(--cyan);
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .social-links a {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        .social-links a:hover {
+            background-color: var(--cyan);
+            transform: translateY(-3px);
+        }
+        
+        .copyright {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            .cta-title {
+                font-size: 2.2rem;
+            }
+            
+            .feature-card {
+                margin-bottom: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#" data-translate-key="navbar_brand"><i class="fas fa-palette"></i> NFT Minter</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#" data-translate-key="nav_home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                    	  <!-- 20250528 -->
+                    	  <!-- <a class="nav-link" href="/mintcc" data-translate-key="nav_create_nft">Criar NFT</a> -->
+                        <a class="nav-link" href="https://nft-bnb-mintar.onrender.com/" data-translate-key="nav_create_nft">Criar NFT</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about" data-translate-key="nav_about">Sobre</a>
+                    </li>
+                </ul>
+                
+                <div style="display: none;">  
+                	<button class="btn btn-connect" data-translate-key="connect_wallet">Conectar Carteira</button>
+                </div>
+                
+                
+                <div class="dropdown ms-2">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-globe"></i> <span data-translate-key="language_button_text">Idioma</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+                        <li><a class="dropdown-item" href="#" onclick="changeLanguage(event, 'pt-BR')">Português</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="changeLanguage(event, 'en')">English</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-section">
+        <div class="container">
+            <h1 class="hero-title" data-translate-key="hero_title">Traga Emoção ao Blockchain</h1>
+            <p class="hero-subtitle" data-translate-key="hero_subtitle">Crie NFTs com análise de sentimento e metadados ricos alimentados por IA</p>
+            <!-- 20250528 -->
+            <!-- <a href="/mintaa" class="btn btn-primary" data-translate-key="hero_cta_button">Conectar Carteira & Criar NFT</a> -->
+            <a href="https://nft-bnb-mintar.onrender.com/" class="btn btn-primary" data-translate-key="hero_cta_button">Conectar Carteira & Criar NFT</a>
+        </div>
+    </section>
+
+    <div class="container feature-section" id="about">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="section-title" data-translate-key="how_it_works_title">Como Funciona</h2>
+                <p class="section-subtitle" data-translate-key="how_it_works_subtitle">Três passos simples para criar seu NFT com análise emocional</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon icon-upload">
+                        <i class="fas fa-upload"></i>
+                    </div>
+                    <h3 class="feature-title" data-translate-key="feature_upload_title">Envie Sua Arte</h3>
+                    <p class="feature-text" data-translate-key="feature_upload_text">Envie sua arte digital e opcionalmente adicione uma descrição para fornecer contexto. Suportamos PNG, JPG, JPEG e GIF.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon icon-storage">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3 class="feature-title" data-translate-key="feature_ai_title">Análise de IA</h3>
+                    <p class="feature-text" data-translate-key="feature_ai_text">Nossa IA analisa cores, composição e estilo para determinar sentimento emocional e temas artísticos da sua obra.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon icon-mint">
+                        <i class="fas fa-cube"></i>
+                    </div>
+                    <h3 class="feature-title" data-translate-key="feature_mint_title">Criar na BNB Chain</h3>
+                    <p class="feature-text" data-translate-key="feature_mint_text">Seu NFT é criado com metadados ricos incluindo análise de sentimento e atributos artísticos na BNB Chain.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="benefits-section">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-12">
+                    <h2 class="section-title" data-translate-key="why_choose_title">Por que Escolher NFT Minter</h2>
+                    <p class="section-subtitle" data-translate-key="why_choose_subtitle">A primeira plataforma a combinar inteligência emocional com tecnologia blockchain para arte digital</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="benefit-item">
+                        <div class="benefit-icon icon-ai">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <div class="benefit-content">
+                            <h3 data-translate-key="benefit_ai_title">Análise Alimentada por IA</h3>
+                            <p data-translate-key="benefit_ai_text">Algoritmos avançados de aprendizado de máquina analisam o conteúdo emocional e estilo artístico da sua arte</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="benefit-item">
+                        <div class="benefit-icon icon-security">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="benefit-content">
+                            <h3 data-translate-key="benefit_security_title">Segurança BNB Chain</h3>
+                            <p data-translate-key="benefit_security_text">Construído na BNB Chain para transações NFT rápidas, seguras e econômicas</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="benefit-item">
+                        <div class="benefit-icon icon-metadata">
+                            <i class="fas fa-tags"></i>
+                        </div>
+                        <div class="benefit-content">
+                            <h3 data-translate-key="benefit_metadata_title">Metadados Ricos</h3>
+                            <p data-translate-key="benefit_metadata_text">Cada NFT inclui metadados emocionais e artísticos detalhados para melhor descoberta</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="benefit-item">
+                        <div class="benefit-icon icon-tracking">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="benefit-content"                            <h3 data-translate-key="benefit_tracking_title">Rastreamento de Proveniência</h3>                            <p data-translate-key="benefit_tracking_text">Rastreie padrões emocionais na sua coleção de arte e descubra sua evolução artística</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6" >
+                    <div class="benefit-item">
+                        <div class="benefit-icon icon-opensource">
+                            <i class="fas fa-code-branch"></i>
+                        </div>
+                        <div class="benefit-content">
+                            <h3 data-translate-key="benefit_opensource_title">Código Aberto</h3>
+                            <p data-translate-key="benefit_opensource_text">Plataforma totalmente de código aberto construída para transparência e contribuição da comunidade</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="benefit-item">
+                        <div class="benefit-icon icon-fast">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div class="benefit-content">
+                            <h3 data-translate-key="benefit_fast_title">Criação Rápida</h3>                           <p data-translate-key="benefit_fast_text">Análise instantânea de IA e processo rápido de criação para experiência perfeita do usuário</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="cta-section">
+        <div class="container">
+           <h2 class="cta-title" data-translate-key="cta_title">Pronto para Criar?</h2>
+            <p class="cta-text" data-translate-key="cta_text">Junte-se a artistas em todo o mundo que estão trazendo profundidade emocional à sua arte digital</p>
+            <!-- 20250528 -->
+            <!--  <a href="/mintbb" class="btn btn-primary" data-translate-key="cta_button">Começar a Criar Agora</a> -->
+            <a href="ver_nft.html" class="btn btn-primary" data-translate-key="cta_button">Visualizar NFT</a>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <a class="navbar-brand mb-4" href="#"><i class="fas fa-palette"></i> NFT Minter</a>
+                    <p class="text-muted" data-translate-key="footer_description">Uma plataforma para criar NFTs com análise emocional e artística alimentada por IA.</p>
+                    <div class="social-links mt-3">
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-discord"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                        <a href="#"><i class="fab fa-medium"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-2 col-6 mb-4">
+                    <div class="footer-links">
+                        <h4 data-translate-key="footer_product_title">Produto</h4>
+                        <ul>
+                            <li><a href="#" data-translate-key="footer_product_features">Recursos</a></li>
+                            <li><a href="#" data-translate-key="footer_product_create_nft">Criar NFT</a></li>
+                            <li><a href="#" data-translate-key="footer_product_explore">Explorar</a></li>
+                            <li><a href="#" data-translate-key="footer_product_pricing">Preços</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-2 col-6 mb-4">
+                    <div class="footer-links">
+                        <h4 data-translate-key="footer_support_title">Suporte</h4>
+                        <ul>
+                            <li><a href="#" data-translate-key="footer_support_docs">Documentação</a></li>
+                            <li><a href="#" data-translate-key="footer_support_tutorials">Tutoriais</a></li>
+                            <li><a href="#" data-translate-key="footer_support_faq">FAQ</a></li>
+                            <li><a href="#" data-translate-key="footer_support_contact">Contato</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-2 col-6 mb-4">
+                    <div class="footer-links">
+                        <h4 data-translate-key="footer_company_title">Empresa</h4>
+                        <ul>
+                            <li><a href="#" data-translate-key="footer_company_about">Sobre</a></li>
+                            <li><a href="#" data-translate-key="footer_company_blog">Blog</a></li>
+                            <li><a href="#" data-translate-key="footer_company_careers">Carreiras</a></li>
+                            <li><a href="#" data-translate-key="footer_company_press">Imprensa</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-2 col-6 mb-4">
+                    <div class="footer-links">
+                        <h4 data-translate-key="footer_legal_title">Legal</h4>
+                        <ul>
+                            <li><a href="#" data-translate-key="footer_legal_terms">Termos</a></li>
+                            <li><a href="#" data-translate-key="footer_legal_privacy">Privacidade</a></li>
+                            <li><a href="#" data-translate-key="footer_legal_cookies">Cookies</a></li>
+                            <li><a href="#" data-translate-key="footer_legal_licenses">Licenças</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright text-center">
+                <p data-translate-key="footer_copyright">© 2025 NFT Minter - Todos os direitos reservados</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+<script>
+    const translations = {
+        'pt-BR': {
+            'page_title': 'NFT Minter - Traga Emoção ao Blockchain',
+            'navbar_brand': 'NFT Minter',
+            'nav_home': 'Home',
+            'nav_create_nft': 'Criar NFT',
+            'nav_about': 'Sobre',
+            'connect_wallet': 'Conectar Carteira',
+            'language_button_text': 'Idioma',
+            'hero_title': 'Traga Emoção ao Blockchain',
+            'hero_subtitle': 'Crie NFTs com análise de sentimento e metadados ricos alimentados por IA',
+            'hero_cta_button': 'Conectar Carteira & Criar NFT',
+            'how_it_works_title': 'Como Funciona',
+            'how_it_works_subtitle': 'Três passos simples para criar seu NFT com análise emocional',
+            'feature_upload_title': 'Envie Sua Arte',
+            'feature_upload_text': 'Envie sua arte digital e opcionalmente adicione uma descrição para fornecer contexto. Suportamos PNG, JPG, JPEG e GIF.',
+            'feature_ai_title': 'Análise de IA',
+            'feature_ai_text': 'Nossa IA analisa cores, composição e estilo para determinar sentimento emocional e temas artísticos da sua obra.',
+            'feature_mint_title': 'Criar na BNB Chain',
+            'feature_mint_text': 'Seu NFT é criado com metadados ricos incluindo análise de sentimento e atributos artísticos na BNB Chain.',
+            'why_choose_title': 'Por que Escolher NFT Minter',
+            'why_choose_subtitle': 'A primeira plataforma a combinar inteligência emocional com tecnologia blockchain para arte digital',
+            'benefit_ai_title': 'Análise Alimentada por IA',
+            'benefit_ai_text': 'Algoritmos avançados de aprendizado de máquina analisam o conteúdo emocional e estilo artístico da sua arte',
+            'benefit_security_title': 'Segurança BNB Chain',
+            'benefit_security_text': 'Construído na BNB Chain para transações NFT rápidas, seguras e econômicas',
+            'benefit_metadata_title': 'Metadados Ricos',
+            'benefit_metadata_text': 'Cada NFT inclui metadados emocionais e artísticos detalhados para melhor descoberta',
+            'benefit_tracking_title': 'Rastreamento de Proveniência',
+            'benefit_tracking_text': 'Rastreie padrões emocionais na sua coleção de arte e descubra sua evolução artística',
+            'benefit_opensource_title': 'Código Aberto',
+            'benefit_opensource_text': 'Plataforma totalmente de código aberto construída para transparência e contribuição da comunidade',
+            'benefit_fast_title': 'Criação Rápida',
+            'benefit_fast_text': 'Análise instantânea de IA e processo rápido de criação para experiência perfeita do usuário',
+            'cta_title': 'Pronto para Criar?',
+            'cta_text': 'Junte-se a artistas em todo o mundo que estão trazendo profundidade emocional à sua arte digital',
+            'cta_button': 'Visualizar NFT',
+            'footer_description': 'Uma plataforma para criar NFTs com análise emocional e artística alimentada por IA.',
+            'footer_product_title': 'Produto',
+            'footer_product_features': 'Recursos',
+            'footer_product_create_nft': 'Criar NFT',
+            'footer_product_explore': 'Explorar',
+            'footer_product_pricing': 'Preços',
+            'footer_support_title': 'Suporte',
+            'footer_support_docs': 'Documentação',
+            'footer_support_tutorials': 'Tutoriais',
+            'footer_support_faq': 'FAQ',
+            'footer_support_contact': 'Contato',
+            'footer_company_title': 'Empresa',
+            'footer_company_about': 'Sobre',
+            'footer_company_blog': 'Blog',
+            'footer_company_careers': 'Carreiras',
+            'footer_company_press': 'Imprensa',
+            'footer_legal_title': 'Legal',
+            'footer_legal_terms': 'Termos',
+            'footer_legal_privacy': 'Privacidade',
+            'footer_legal_cookies': 'Cookies',
+            'footer_legal_licenses': 'Licenças',
+            'footer_copyright': '© 2025 NFT Minter - Todos os direitos reservados'
+        },
+        'en': {
+            'page_title': 'NFT Minter - Bring Emotion to the Blockchain',
+            'navbar_brand': 'NFT Minter',
+            'nav_home': 'Home',
+            'nav_create_nft': 'Create NFT',
+            'nav_about': 'About',
+            'connect_wallet': 'Connect Wallet',
+            'language_button_text': 'Language',
+            'hero_title': 'Bring Emotion to the Blockchain',
+            'hero_subtitle': 'Create NFTs with AI-powered sentiment analysis and rich metadata',
+            'hero_cta_button': 'Connect Wallet & Create NFT',
+            'how_it_works_title': 'How It Works',
+            'how_it_works_subtitle': 'Three simple steps to mint your NFT with emotional analysis',
+            'feature_upload_title': 'Upload Your Art',
+            'feature_upload_text': 'Submit your digital artwork and optionally add a description for context. We support PNG, JPG, JPEG, and GIF.',
+            'feature_ai_title': 'AI Analysis',
+            'feature_ai_text': 'Our AI analyzes colors, composition, and style to determine the emotional sentiment and artistic themes of your piece.',
+            'feature_mint_title': 'Mint on BNB Chain',
+            'feature_mint_text': 'Your NFT is minted with rich metadata including sentiment analysis and artistic attributes on the BNB Chain.',
+            'why_choose_title': 'Why Choose NFT Minter',
+            'why_choose_subtitle': 'The first platform combining emotional intelligence with blockchain technology for digital art',
+            'benefit_ai_title': 'AI-Powered Analysis',
+            'benefit_ai_text': 'Advanced machine learning algorithms analyze the emotional content and artistic style of your art',
+            'benefit_security_title': 'BNB Chain Security',
+            'benefit_security_text': 'Built on the BNB Chain for fast, secure, and cost-effective NFT transactions',
+            'benefit_metadata_title': 'Rich Metadata',
+            'benefit_metadata_text': 'Each NFT includes detailed emotional and artistic metadata for enhanced discoverability',
+            'benefit_tracking_title': 'Provenance Tracking',
+            'benefit_tracking_text': 'Track emotional patterns across your art collection and discover your artistic evolution',
+            'benefit_opensource_title': 'Open Source',
+            'benefit_opensource_text': 'Fully open-source platform built for transparency and community contribution',
+            'benefit_fast_title': 'Fast Minting',
+            'benefit_fast_text': 'Instant AI analysis and rapid minting process for a seamless user experience',
+            'cta_title': 'Ready to Create?',
+            'cta_text': 'Join artists worldwide who are bringing emotional depth to their digital art',
+            'cta_button': 'Start Minting Now',
+            'footer_description': 'A platform for creating NFTs with AI-powered emotional and artistic analysis.',
+            'footer_product_title': 'Product',
+            'footer_product_features': 'Features',
+            'footer_product_create_nft': 'Create NFT',
+            'footer_product_explore': 'Explore',
+            'footer_product_pricing': 'Pricing',
+            'footer_support_title': 'Support',
+            'footer_support_docs': 'Documentation',
+            'footer_support_tutorials': 'Tutorials',
+            'footer_support_faq': 'FAQ',
+            'footer_support_contact': 'Contact',
+            'footer_company_title': 'Company',
+            'footer_company_about': 'About',
+            'footer_company_blog': 'Blog',
+            'footer_company_careers': 'Careers',
+            'footer_company_press': 'Press',
+            'footer_legal_title': 'Legal',
+            'footer_legal_terms': 'Terms',
+            'footer_legal_privacy': 'Privacy',
+            'footer_legal_cookies': 'Cookies',
+            'footer_legal_licenses': 'Licenses',
+            'footer_copyright': '© 2025 NFT Minter - All rights reserved'
+        }
+    };
+
+    function changeLanguage(event, lang) {
+        event.preventDefault(); // Prevent default link behavior
+        // Update HTML lang attribute
+        document.documentElement.lang = lang;
+
+        // Update page title
+        document.title = translations[lang]['page_title'];
+
+        // Update all elements with data-translate-key
+        document.querySelectorAll('[data-translate-key]').forEach(element => {
+            const key = element.getAttribute('data-translate-key');
+            if (translations[lang][key]) {
+                element.innerText = translations[lang][key];
+            }
+        });
+
+        // Update language dropdown button text (optional, but good UX)
+        const langButtonText = document.querySelector('#languageDropdown [data-translate-key="language_button_text"]');
+        if (langButtonText) {
+             langButtonText.innerText = translations[lang]['language_button_text'];
+        }
+        
+        // Update dropdown items text (optional, for consistency)
+        const ptOption = document.querySelector('.dropdown-item[onclick="changeLanguage(\'pt-BR\')"]');
+        const enOption = document.querySelector('.dropdown-item[onclick="changeLanguage(\'en\')"]');
+        if (ptOption) ptOption.innerText = lang === 'pt-BR' ? 'Português' : 'Portuguese';
+        if (enOption) enOption.innerText = lang === 'en' ? 'English' : 'Inglês';
+
+    }
+
+    // Optional: Set initial language based on browser preference or default
+    // const userLang = navigator.language || navigator.userLanguage; 
+    // if (userLang.startsWith('en')) {
+    //     changeLanguage('en');
+    // } else {
+    //     changeLanguage('pt-BR'); // Default to Portuguese
+    // }
+    // For now, we keep the default 'pt-BR' as set in the HTML tag
+
+</script>
+

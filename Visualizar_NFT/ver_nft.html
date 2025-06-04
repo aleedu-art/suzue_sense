@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador de NFTs - BNB Smart Chain Testnet</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+	    	:root {
+	            --dark-blue: #0f0b2a;
+	            --medium-blue: #1a1642;
+	            --light-blue: #4e9fff;
+	            --purple: #8a56ff;
+	            --cyan: #56d6ff;
+	            --pink: #ff56d6;
+	            --orange: #ff8a56;
+	            --yellow: #ffdd56;
+	        }
+        body {
+               background-color: var(--dark-blue);
+            color: white;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            
+        }
+        .container {
+            max-width: 1200px;
+            margin-top: 30px;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border: none;
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card-header {
+            background: linear-gradient(135deg, #6e45e2, #88d3ce);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #6e45e2, #88d3ce);
+            border: none;
+            border-radius: 30px;
+            padding: 10px 20px;
+            font-weight: bold;
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5d3bc4, #7ac4be);
+            transform: translateY(-2px);
+            transition: all 0.3s;
+        }
+        .btn-outline-primary {
+            color: #6e45e2;
+            border-color: #6e45e2;
+            border-radius: 30px;
+            padding: 10px 20px;
+            font-weight: bold;
+        }
+        .btn-outline-primary:hover {
+            background-color: #6e45e2;
+            color: white;
+        }
+        .nft-card {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .nft-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        .nft-image-container {
+            position: relative;
+            width: 100%;
+            padding-top: 100%; /* 1:1 Aspect Ratio */
+            overflow: hidden;
+            background-color: var(--medium-blue);
+        }
+        .nft-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background-color: #f0f0f0;
+        }
+        .nft-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+            color: #aaa;
+            font-size: 3rem;
+        }
+        .nft-body {
+            padding: 15px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .nft-title {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .nft-description {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            flex-grow: 1;
+        }
+        .nft-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+        .nft-id {
+            font-size: 0.8rem;
+            color: #999;
+        }
+        .nft-link {
+            font-size: 0.9rem;
+            color: #6e45e2;
+        }
+        .nft-link:hover {
+            color: #5d3bc4;
+            text-decoration: none;
+        }
+        .wallet-info {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+        .wallet-address {
+            font-family: monospace;
+            font-size: 0.9rem;
+            word-break: break-all;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            color: #6e45e2;
+        }
+        .badge-bnb {
+            background-color: #F3BA2F;
+            color: #000;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: normal;
+            font-size: 0.8rem;
+        }
+        .alert {
+            border-radius: 15px;
+        }
+        .filter-section {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+        .attribute-badge {
+            background-color: #e2e3e5;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 20px;
+            margin: 3px;
+            font-size: 0.8rem;
+            display: inline-block;
+        }
+        .no-nfts-message {
+            text-align: center;
+            padding: 50px 0;
+            color: #999;
+        }
+        .metadata-section {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .metadata-title {
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        .metadata-json {
+            background-color: #212529;
+            color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            font-size: 0.8rem;
+        }
+        .network-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+            background-color: rgba(243, 186, 47, 0.9);
+            color: #000;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        
+        /* Novos estilos para o modal de detalhes */
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        .modal-header {
+            background: linear-gradient(135deg, #6e45e2, #88d3ce);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            border-bottom: none;
+        }
+        .modal-footer {
+            border-top: none;
+            padding: 15px 20px 20px;
+        }
+        .modal-body {
+            padding: 20px;
+        }
+        .preview-container {
+            width: 100%;
+            height: 300px;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .preview-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .nft-details-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 10px;
+            border-left: 5px solid #6e45e2;
+        }
+        .nft-details-title {
+            color: #6e45e2;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .nft-details-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #ccc;
+        }
+        .nft-details-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .nft-details-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .nft-details-value {
+            color: #555;
+            font-size: 0.95rem;
+        }
+        .btn-outline-secondary {
+            border-radius: 20px;
+        }
+        
+        /* Estilos para a seção de análise */
+        .analysis-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f8ff;
+            border-radius: 10px;
+            border-left: 5px solid #6e45e2;
+        }
+        .analysis-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #ccc;
+        }
+        .analysis-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .analysis-title {
+            font-weight: 600;
+            color: #6e45e2;
+            margin-bottom: 5px;
+        }
+        .analysis-content {
+            color: #555;
+            font-size: 0.95rem;
+        }
+        
+        /* 20250528 */
+        .feature-card {
+            background-color: var(--medium-blue);
+            border-radius: 16px;
+            padding: 30px;
+            height: 100%;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .form-text {
+            color: white;
+        }
+        
+       .navbar {
+            background-color: var(--dark-blue) !important;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: white !important;
+            display: flex;
+            align-items: center;
+        }
+        
+        .navbar-brand i {
+            color: var(--cyan);
+            margin-right: 10px;
+            font-size: 1.8rem;
+        }
+        
+        .navbar-dark .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+            padding: 10px 15px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .navbar-dark .navbar-nav .nav-link:hover,
+        .navbar-dark .navbar-nav .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }   
+        
+                       
+    </style>
+</head>
+<body>
+	
+	    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#" data-translate-key="navbar_brand"><i class="fas fa-palette"></i> NFT Minter</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="index.html" data-translate-key="nav_home">Home</a>
+                    </li>
+   
+         
+                </ul>
+    
+                
+                
+  
+            </div>
+        </div>
+    </nav>
+	
+	
+	
+	
+	
+    <div class="container">
+    	
+    	
+     
+        <h1 class="text-center mb-4">
+        	  <!-- <i class="fas fa-cubes me-2" style="color: #6e45e2;"></i> -->
+            
+            Visualizador de NFTs
+        </h1>
+        
+        
+        
+        <!-- <div class="card mb-4"> -->
+        <!-- <div class="feature-card"> -->
+        <div  >
+           
+           
+           <!--   
+            <div class="card-header">
+                <i class="fas fa-wallet me-2"></i>Conectar Carteira
+            </div>
+           --> 
+          
+            <!-- <div class="card-body"> -->
+            <!-- <div class="feature-card"> -->
+              <div  >  
+            	
+            	
+                <div id="alerts-container"></div>
+                 
+                 <!-- <div class="wallet-info mb-4"> -->
+                <div class="feature-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">
+                            <i class="fas fa-user-circle me-2"></i> Sua Carteira
+                        </h5>
+                        <button id="connect-wallet-btn" class="btn btn-primary">
+                            <i class="fas fa-plug me-2"></i> Conectar MetaMask
+                        </button>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1">
+                                <strong>Status:</strong> 
+                                <span id="wallet-status" class="badge bg-secondary">Desconectado</span>
+                            </p>
+                            <p class="mb-1">
+                                <strong>Rede:</strong> 
+                                <span id="network-name">Não detectada</span>
+                                <span id="network-badge" class="badge badge-bnb" style="display: none;">BNB Testnet</span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1">
+                                <strong>Endereço:</strong> 
+                                <span id="wallet-address" class="wallet-address">Não conectado</span>
+                            </p>
+                            <p class="mb-1">
+                                <strong>Saldo:</strong> 
+                                <span id="wallet-balance">0 BNB</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!--  <div class="filter-section"> -->
+                <div class="feature-card">
+                    <div class="row align-items-end">
+                        <div class="col-md-6 mb-3">
+                            <label for="contract-address" class="form-label">Endereço do Contrato NFT (opcional)</label>
+                            <input type="text" class="form-control" id="contract-address" placeholder="0x...">
+                            <div class="form-text">Deixe em branco para buscar todos os NFTs da carteira</div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="chain-select" class="form-label">Rede</label>
+                            <select class="form-select" id="chain-select">
+                                <option value="bsc testnet" selected>BNB Smart Chain Testnet</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <button id="fetch-nfts-btn" class="btn btn-primary w-100" disabled>
+                                <i class="fas fa-search me-2"></i> Buscar NFTs
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            
+             
+        </div>
+        
+        <div id="loading" class="loading">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p id="loading-text" class="mt-2">Buscando seus NFTs...</p>
+        </div>
+        
+        <div id="nft-container">
+            <div id="no-nfts-message" class="no-nfts-message" style="display: none;">
+                <i class="fas fa-search fa-3x mb-3" style="color: #ddd;"></i>
+                <h4>Nenhum NFT encontrado</h4>
+                <p class="text-muted">Conecte sua carteira e busque seus NFTs na BNB Smart Chain Testnet</p>
+            </div>
+            
+            <div id="nfts-grid" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 feature-card">
+                <!-- NFTs serão inseridos aqui dinamicamente -->
+            </div>
+        </div>
+        
+        <div class="mt-5 text-center">
+            <p class="text-muted" style="display: none;">
+                <i class="fas fa-info-circle me-1"></i>
+                Este visualizador utiliza a API Moralis para buscar NFTs na BNB Smart Chain Testnet
+            </p>
+            <p class="text-muted" style="display: none;">
+                <small>Desenvolvido com <i class="fas fa-heart" style="color: #6e45e2;"></i> para entusiastas de NFT</small>
+            </p>
+        </div>
+        </div>
+
+    <!-- Modal para exibir detalhes do NFT -->
+    <div class="modal fade" id="nftDetailModal" tabindex="-1" aria-labelledby="nftDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="nftDetailModalLabel">Detalhes do NFT</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="preview-container">
+                                <img id="modal-nft-image" class="preview-image" src="" alt="NFT Image">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h4 id="modal-nft-name" class="mb-3">Nome do NFT</h4>
+                            
+                            <div class="nft-details-section">
+                                <div class="nft-details-item">
+                                    <div class="nft-details-label">Descrição</div>
+                                    <div id="modal-nft-description" class="nft-details-value">
+                                        <!-- Descrição formatada será inserida aqui -->
+                                    </div>
+                                </div>
+                                
+                                <div class="nft-details-item">
+                                    <div class="nft-details-label">Token ID</div>
+                                    <div id="modal-nft-id" class="nft-details-value">0</div>
+                                </div>
+                                
+                                <div class="nft-details-item">
+                                    <div class="nft-details-label">Contrato</div>
+                                    <div class="nft-details-value">
+                                        <a id="modal-contract-link" href="#" target="_blank" class="text-break">
+                                            <span id="modal-nft-contract">0x0</span>
+                                        </a>
+                                    </div>
+                                </div>
+                                
+                                <div class="nft-details-item">
+                                    <div class="nft-details-label">Proprietário</div>
+                                    <div class="nft-details-value">
+                                        <a id="modal-owner-link" href="#" target="_blank" class="text-break">
+                                            <span id="modal-nft-owner">0x0</span>
+                                        </a>
+                                    </div>
+                                </div>
+                                
+                                <div id="modal-attributes-container" class="nft-details-item">
+                                    <div class="nft-details-label">Atributos</div>
+                                    <div id="modal-attributes" class="d-flex flex-wrap mt-2">
+                                        <!-- Atributos serão inseridos aqui -->
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5 class="mb-0">Metadados</h5>
+                                    <button id="toggle-metadata-btn" class="btn btn-sm btn-outline-secondary">
+                                        Mostrar Metadados
+                                    </button>
+                                </div>
+                                <div id="metadata-json-container" class="metadata-section" style="display: none;">
+                                    <pre id="modal-metadata-json" class="metadata-json">Carregando...</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a id="modal-opensea-link" href="#" target="_blank" class="btn btn-outline-primary" style="display: none;">
+                        <i class="fas fa-external-link-alt me-2"></i> Ver no OpenSea Testnet
+                    </a>
+                    <a id="modal-bscscan-link" href="#" target="_blank" class="btn btn-primary">
+                        <i class="fas fa-search me-2"></i> Ver no BscScan
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="app_v6.js"></script>
+    
+    <!-- Script inline para garantir que o botão de conexão funcione -->
+    <script>
+     	
+
+     	
+     	
+    	  // Definir endereço do contrato fixo - BNB
+  			document.getElementById('contract-address').value = '0x2d71ecA22b84522305E581A754D3D5F77c1884af';		
+    	
+        // Script de backup para garantir que o botão de conexão funcione
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("Script de backup carregado");
+
+            
+            // Verificar se o botão já tem event listener
+            const connectButton = document.getElementById('connect-wallet-btn');
+            if (connectButton) {
+                console.log("Botão de conexão encontrado");
+                
+                // Adicionar event listener de backup
+                connectButton.addEventListener('click', function() {
+                    console.log("Clique no botão de conexão detectado pelo script de backup");
+                    
+                    // Tentar conectar à carteira
+                    if (typeof window.ethereum !== 'undefined') {
+                        console.log("MetaMask detectado pelo script de backup");
+                        
+                        window.ethereum.request({ method: 'eth_requestAccounts' })
+                            .then(function(accounts) {
+                                console.log("Contas obtidas pelo script de backup:", accounts);
+                                if (accounts.length > 0) {
+                                    // Se o app_v6.js estiver funcionando, ele lidará com isso
+                                    // Caso contrário, atualizamos a interface aqui
+                                    if (document.getElementById('wallet-status').textContent === "Desconectado") {
+                                        document.getElementById('wallet-status').textContent = "Conectado";
+                                        document.getElementById('wallet-status').className = "badge bg-success";
+                                        document.getElementById('wallet-address').textContent = accounts[0].substring(0, 6) + '...' + accounts[0].substring(accounts[0].length - 4);
+                                        document.getElementById('fetch-nfts-btn').disabled = false;
+                                        
+                                        // Mostrar alerta de sucesso
+                                        const alertsContainer = document.getElementById('alerts-container');
+                                        const alertId = 'alert-' + Date.now();
+                                        alertsContainer.innerHTML += `
+                                            <div id="${alertId}" class="alert alert-success alert-dismissible fade show" role="alert">
+                                                Carteira conectada com sucesso!
+                                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                                            </div>
+                                        `;
+                                        
+                                        // Auto-remover após 5 segundos
+                                        setTimeout(() => {
+                                            const alertElement = document.getElementById(alertId);
+                                            if (alertElement) {
+                                                alertElement.remove();
+                                            }
+                                        }, 5000);
+                                    }
+                                }
+                            })
+                            .catch(function(error) {
+                                console.error("Erro ao conectar carteira pelo script de backup:", error);
+                                
+                                // Mostrar alerta de erro
+                                const alertsContainer = document.getElementById('alerts-container');
+                                const alertId = 'alert-' + Date.now();
+                                alertsContainer.innerHTML += `
+                                    <div id="${alertId}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        Erro ao conectar à MetaMask: ${error.message || "Verifique se a extensão está desbloqueada."}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                                    </div>
+                                `;
+                                
+                                // Auto-remover após 5 segundos
+                                setTimeout(() => {
+                                    const alertElement = document.getElementById(alertId);
+                                    if (alertElement) {
+                                        alertElement.remove();
+                                    }
+                                }, 5000);
+                            });
+                    } else {
+                        console.log("MetaMask não detectado pelo script de backup");
+                        
+                        // Mostrar alerta de erro
+                        const alertsContainer = document.getElementById('alerts-container');
+                        const alertId = 'alert-' + Date.now();
+                        alertsContainer.innerHTML += `
+                            <div id="${alertId}" class="alert alert-warning alert-dismissible fade show" role="alert">
+                                MetaMask não encontrado. Por favor, instale a extensão MetaMask para usar este aplicativo.
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                            </div>
+                        `;
+                        
+                        // Auto-remover após 5 segundos
+                        setTimeout(() => {
+                            const alertElement = document.getElementById(alertId);
+                            if (alertElement) {
+                                alertElement.remove();
+                            }
+                        }, 5000);
+                    }
+                });
+            } else {
+                console.error("Botão de conexão não encontrado pelo script de backup");
+            }
+            
+                        // 20250601
+            // Verifica se o MetaMask está instalado
+            checkMetaMaskInstallation(); 
+            
+        });
+        
+        
+// --------------------- INICIO  carteira MetaMask
+
+        function checkMetaMaskInstallation() {
+            if (typeof window.ethereum !== 'undefined') {
+                console.log('MetaMask detectado');
+                
+                // Configura listeners para eventos do MetaMask
+                window.ethereum.on('accountsChanged', handleAccountsChanged);
+                window.ethereum.on('chainChanged', handleChainChanged);
+                
+                // Tenta conectar automaticamente se já autorizado
+                if (window.ethereum.isConnected()) {
+                    connectWallet();
+                }
+            } else {
+              
+                /*
+                logDebug('MetaMask não encontrado');
+                showAlert('MetaMask não encontrado. Por favor instale a extensão MetaMask para usar este aplicativo.', 'warning');
+                
+                // Verifica se é um dispositivo móvel
+                if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                    logDebug('Dispositivo móvel detectado');
+                    showMobileMetaMaskInstructions();
+                }
+                */
+           
+								console.log('MetaMask não encontrado');
+								    
+								    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+								        console.log('Dispositivo móvel detectado');
+
+								        // Redireciona para MetaMask Mobile se estiver em celular
+								        // const dappUrl = "seu-site.render.com"; // seu domínio aqui, sem https://
+								        // const dappUrl = "https://nft-bnb-mintar.onrender.com"; // seu domínio aqui, sem https://
+								      
+								        const dappUrl = "https://nft-bnb-20250527.vercel.app/ver_nft.html"; // seu domínio aqui, sem https://								       
+								        
+								        const metamaskAppDeepLink = `https://metamask.app.link/dapp/${dappUrl}`;
+								        
+								        showAlert('Abrindo MetaMask Mobile...', 'info');
+								        window.location.href = metamaskAppDeepLink;
+								    } else {
+								        showAlert('MetaMask não encontrado. Por favor instale a extensão MetaMask para usar este aplicativo.', 'warning');
+								    }           
+           
+           
+            }
+        }
+
+// --------------------- FIM  carteira MetaMask        
+        
+    </script>
+</body>
+</html>

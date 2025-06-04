@@ -1,0 +1,1674 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criador de Metadados NFT com Análise de Sentimentos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+    	
+        :root {
+            --dark-blue: #0f0b2a;
+            --medium-blue: #1a1642;
+            --light-blue: #4e9fff;
+            --purple: #8a56ff;
+            --cyan: #56d6ff;
+            --pink: #ff56d6;
+            --orange: #ff8a56;
+            --yellow: #ffdd56;
+        } 
+        
+        /* 
+        
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        
+        */
+           	
+        body {
+            background-color: var(--dark-blue);
+            color: white;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            
+        }
+        
+        
+        .container {
+            max-width: 800px;
+            margin-top: 30px;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border: none;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #6e45e2, #88d3ce);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #6e45e2, #88d3ce);
+            border: none;
+            border-radius: 30px;
+            padding: 10px 20px;
+            font-weight: bold;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5d3bc4, #7ac4be);
+            transform: translateY(-2px);
+            transition: all 0.3s;
+        }
+        .preview-container {
+            width: 100%;
+            height: 300px;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .preview-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+        .alert {
+            border-radius: 10px;
+        }
+        .form-control {
+            border-radius: 10px;
+        }
+        .form-label {
+            font-weight: 600;
+            background-color: #0a1117;
+        }
+        
+        /* background-color: #f8f9fa; */
+        #debug-info {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #0a1117;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            display: block;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        /* Estilos para a seção de análise de sentimentos */
+        .analysis-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f8ff;
+            border-radius: 10px;
+            border-left: 5px solid #6e45e2;
+        }
+        .analysis-section h5 {
+            color: #6e45e2;
+            margin-bottom: 15px;
+        }
+        .analysis-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #ccc;
+        }
+        .analysis-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .analysis-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .analysis-content {
+            color: #555;
+            font-size: 0.95rem;
+        }
+        .keyword-badge {
+            display: inline-block;
+            background-color: #e9ecef;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 20px;
+            margin: 3px;
+            font-size: 0.8rem;
+        }
+        .attribute-badge {
+            display: inline-block;
+            background-color: #e2e3e5;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 20px;
+            margin: 3px;
+            font-size: 0.8rem;
+        }
+        .attribute-badge .trait-type {
+            font-weight: 600;
+        }
+        /* Estilos para a seção de metadados */
+        .metadata-result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+        .metadata-json {
+            background-color: #212529;
+            color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .ipfs-link {
+            word-break: break-all;
+        }
+        /* Estilos para a seção de mintagem - background-color: #f5f5f5;*/
+        .mint-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #0a1117;
+            border-radius: 10px;
+            border-left: 5px solid #28a745;
+        }
+        .mint-section h5 {
+            color: #28a745;
+            margin-bottom: 15px;
+        }
+        .abi-textarea {
+            font-family: monospace;
+            font-size: 0.8rem;
+            height: 150px;
+        }
+        
+        
+        /* background-color: #e9ecef; */
+        .wallet-info {
+            
+            background-color: var(--dark-blue);
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        .wallet-address {
+            font-family: monospace;
+            font-size: 0.9rem;
+            word-break: break-all;
+        }
+        .collapsible-section {
+            margin-top: 15px;
+        }
+        .collapsible-header {
+            background-color: #e9ecef;
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .collapsible-content {
+            padding: 15px;
+            border: 1px solid #e9ecef;
+            border-radius: 0 0 10px 10px;
+            display: none;
+        }
+        
+        /* 20250528 */
+        .feature-card {
+            background-color: var(--medium-blue);
+            border-radius: 16px;
+            padding: 30px;
+            height: 100%;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* 20250601 */
+        .feature-card_b {
+            background-color: var(--medium-blue);
+            padding: 30px;
+            height: 100%;
+            transition: all 0.3s;
+             
+        }        
+        
+        .card-body {
+            background-color: var(--medium-blue);
+            border-radius: 16px;
+            padding: 30px;
+            height: 100%;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }      
+        
+        .form-text_branco {
+            color: white;
+        }
+        
+        
+        
+       .navbar {
+            background-color: var(--dark-blue) !important;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: white !important;
+            display: flex;
+            align-items: center;
+        }
+        
+        .navbar-brand i {
+            color: var(--cyan);
+            margin-right: 10px;
+            font-size: 1.8rem;
+        }
+        
+        .navbar-dark .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+            padding: 10px 15px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .navbar-dark .navbar-nav .nav-link:hover,
+        .navbar-dark .navbar-nav .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }        
+
+        
+    </style>
+</head> 
+<body   >
+
+	    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#" data-translate-key="navbar_brand"><i class="fas fa-palette"></i> NFT Minter</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item">
+                    	  <!-- <a class="nav-link active" aria-current="page" href="index.html" data-translate-key="nav_home">Home</a> -->
+                        <a class="nav-link active" aria-current="page" href="https://nft-bnb-20250527.vercel.app/" data-translate-key="nav_home">Home</a>
+                    </li>
+   
+         
+                </ul>
+    
+                
+                
+  
+            </div>
+        </div>
+    </nav>
+	
+	
+    <div class="container"  >
+    	<!-- <div class="feature-card"> -->
+    	<div > 
+    	
+    	
+        <h1 class="text-center mb-4 form-text_branco" >Criador de Metadados NFT com Análise de Sentimentos</h1>
+        
+        <div class="card">
+        	  <!-- <div class="card-header">xxx Criar e Mintar NFT com Análise de Sentimentos</div> -->
+            
+            <div class="card-body">
+                <div id="alerts-container"></div>
+                
+                <!-- Seção de Carteira -->
+                <div class="wallet-info mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="mb-0">Carteira MetaMask</h5>
+                        <button id="connect-wallet-btn" class="btn btn-sm btn-primary">Conectar Carteira</button>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Status:</strong> <span id="wallet-status">Desconectado</span></p>
+                            <p class="mb-1"><strong>Rede:</strong> <span id="network-name">Não detectada</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Endereço:</strong> <span id="wallet-address" class="wallet-address">Não conectado</span></p>
+                            <p class="mb-1"><strong>Saldo:</strong> <span id="wallet-balance">0 ETH</span></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3 form-text_branco">
+                    <label for="nft-image" class="form-label">Imagem do NFT</label>
+                    <input type="file" class="form-control" id="nft-image" accept="image/*">
+                </div>
+                
+                <div class="preview-container mb-3 form-text_branco">
+                    <img id="image-preview" class="preview-image" src="" alt="Preview da imagem" style="display: none;">
+                    <p id="no-preview" class="text-muted">Nenhuma imagem selecionada</p>
+                </div>
+                
+                <div class="mb-3 form-text_branco">
+                    <label for="nft-name" class="form-label">Nome do NFT</label>
+                    <input type="text" class="form-control" id="nft-name" placeholder="Digite o nome do seu NFT">
+                </div>
+                
+                <div class="mb-3 form-text_branco">
+                    <label for="nft-description" class="form-label">Descrição Básica</label>
+                    <textarea class="form-control" id="nft-description" rows="3" placeholder="Descreva seu NFT (uma análise detalhada será gerada automaticamente)"></textarea>
+                </div>
+                
+                <!-- Seção de Mintagem (inicialmente oculta) -->
+                <!-- <div id="mint-section" class="mint-section" style="display: none;"> -->
+                <div id="mint-section" class="mint-section" >
+                    <h5>Configurações de Mintagem</h5>
+                    
+                    <div class="mb-3">
+                        <label for="contract-address" class="form-label">Endereço do Contrato NFT</label>
+                        <!-- <input type="text" class="form-control" id="contract-address" placeholder="0x..."> -->
+                          <input type="text" class="form-control" id="contract-address" placeholder="0x...">  
+                        <!--  <input type="text" class="form-control" id="contract-address" value="0xC1B247Ea8DaE4912Bf4216A6E8954aa90C779ABD" readonly> -->
+
+                    </div>
+                    
+                     
+                    <!-- 20250526 - escondeu DIV abaixo que mostra ABI -->
+                    <div class="collapsible-section" style="display: none;">
+                        <div class="collapsible-header" onclick="toggleAbiSection()">
+                            <i class="fas fa-chevron-down"></i> ABI do Contrato (Clique para expandir)
+                        </div>
+                        <div id="abi-section" class="collapsible-content">
+                            <div class="mb-3">
+                                <textarea class="form-control abi-textarea" id="contract-abi" placeholder="Cole o ABI do contrato aqui (formato JSON)"></textarea>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <button id="format-abi-btn" class="btn btn-sm btn-outline-secondary">Formatar ABI</button>
+                                <button id="restore-default-abi-btn" class="btn btn-sm btn-outline-secondary">Restaurar ABI Padrão</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Seção de análise de sentimentos (inicialmente oculta) -->
+                <div id="analysis-section" class="analysis-section" style="display: none;">
+                    <h5>Análise de Sentimentos da Imagem</h5>
+                    
+                    <div class="analysis-item">
+                        <div class="analysis-title">Sentimentos Evocados</div>
+                        <div id="sentiment-analysis" class="analysis-content">Carregando análise...</div>
+                    </div>
+                    
+                    <div class="analysis-item">
+                        <div class="analysis-title">Psicologia das Cores</div>
+                        <div id="color-psychology" class="analysis-content">Carregando análise...</div>
+                    </div>
+                    
+                    <div class="analysis-item">
+                    	  <!--  
+                    	  <div class="analysis-title">Relação com Signos</div> 
+                    	  <div id="zodiac-relation" class="analysis-content">Carregando análise...</div>
+                    	  -->
+                        <div class="analysis-title">Relação com Símbolos</div>
+                        <div id="symbol-relation" class="analysis-content">Carregando análise...</div>
+                    </div>
+                    
+                    <div class="analysis-item">
+                        <div class="analysis-title">Linguagem Visual</div>
+                        <div id="visual-language" class="analysis-content">Carregando análise...</div>
+                    </div>
+                    
+                    <div class="analysis-item">
+                        <div class="analysis-title">Palavras-chave</div>
+                        <div id="keywords-container" class="d-flex flex-wrap"></div>
+                    </div>
+                    
+                    <div class="analysis-item">
+                        <div class="analysis-title">Atributos Gerados</div>
+                        <div id="attributes-container" class="d-flex flex-wrap"></div>
+                    </div>
+                </div>
+                
+                <!-- Seção de resultado dos metadados (inicialmente oculta) -->
+                <div id="metadata-result" class="metadata-result" style="display: none;">
+                    <h5>Metadados NFT Gerados</h5>
+                    <div class="mb-3">
+                        <div class="alert alert-success">
+                            <strong>Metadados criados com sucesso!</strong>
+                            <p>Hash IPFS: <span id="metadata-ipfs-hash" class="ipfs-link"></span></p>
+                            <p>Link para visualização: <a id="metadata-ipfs-link" href="#" target="_blank">Abrir metadados</a></p>
+                        </div>
+                    </div>
+                    <div class="mb-3" >
+                        <h6>Conteúdo do arquivo metadata.json:</h6>
+                        <pre id="metadata-json" class="metadata-json"></pre>
+                    </div>
+                </div>
+                
+                <!-- Seção de resultado da mintagem (inicialmente oculta) -->
+                <div id="mint-result" class="metadata-result" style="display: none;">
+                    <h5>NFT Mintado com Sucesso!</h5>
+                    <div class="mb-3">
+                        <div class="alert alert-success">
+                            <strong>NFT mintado com sucesso!</strong>
+                            <p>Hash da Transação: <span id="transaction-hash" class="ipfs-link"></span></p>
+                            <p>Link para visualização: <a id="transaction-link" href="#" target="_blank">Ver transação</a></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 mt-3">
+                    <button id="upload-btn" class="btn btn-primary">Fazer Upload e Analisar Imagem</button>
+                    <button id="create-metadata-btn" class="btn btn-primary" disabled>Criar Metadados e Mintar NFT</button>
+                </div>
+                
+                <div id="loading" class="loading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                    <p id="loading-text" class="mt-2">Processando...</p>
+                </div>
+                
+                <!--  <div class="mt-3"  style="display: none;"> -->
+                <div class="mt-3"   >
+                    <button id="toggle-debug" class="btn btn-sm btn-outline-secondary">Mostrar/Ocultar Informações de Depuração</button>
+                    <div id="debug-info"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4 text-center"  style="display: none;">
+            <p class="text-muted">Desenvolvido com ❤️ para entusiastas de NFT</p>
+        </div>
+        
+       </div>
+        
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script>
+        // Variáveis globais
+        let imageIpfsHash = null;
+        let imageAnalysis = null;
+        let metadataIpfsHashValue = null;
+        let provider = null;
+        let signer = null;
+        let walletAddress = null;
+        let networkName = null;
+        
+        // 20250526
+        // Definir endereço do contrato fixo - SEPOLIA
+  			// document.getElementById('contract-address').value = '0x4498194B54F3f9ec4e397fbcC5280429328010e8';
+  			
+        // Definir endereço do contrato fixo - BNB
+  			document.getElementById('contract-address').value = '0x2d71ecA22b84522305E581A754D3D5F77c1884af';			
+   
+
+        // 20250526 - FIXA O ABI
+        // ABI padrão para contratos ERC-721
+        const defaultAbi = 
+					        
+					[
+					  {
+					    "inputs": [],
+					    "stateMutability": "nonpayable",
+					    "type": "constructor"
+					  },
+					  {
+					    "anonymous": false,
+					    "inputs": [
+					      {
+					        "indexed": true,
+					        "internalType": "address",
+					        "name": "owner",
+					        "type": "address"
+					      },
+					      {
+					        "indexed": true,
+					        "internalType": "address",
+					        "name": "approved",
+					        "type": "address"
+					      },
+					      {
+					        "indexed": true,
+					        "internalType": "uint256",
+					        "name": "tokenId",
+					        "type": "uint256"
+					      }
+					    ],
+					    "name": "Approval",
+					    "type": "event"
+					  },
+					  {
+					    "anonymous": false,
+					    "inputs": [
+					      {
+					        "indexed": true,
+					        "internalType": "address",
+					        "name": "owner",
+					        "type": "address"
+					      },
+					      {
+					        "indexed": true,
+					        "internalType": "address",
+					        "name": "operator",
+					        "type": "address"
+					      },
+					      {
+					        "indexed": false,
+					        "internalType": "bool",
+					        "name": "approved",
+					        "type": "bool"
+					      }
+					    ],
+					    "name": "ApprovalForAll",
+					    "type": "event"
+					  },
+					  {
+					    "anonymous": false,
+					    "inputs": [
+					      {
+					        "indexed": true,
+					        "internalType": "address",
+					        "name": "from",
+					        "type": "address"
+					      },
+					      {
+					        "indexed": true,
+					        "internalType": "address",
+					        "name": "to",
+					        "type": "address"
+					      },
+					      {
+					        "indexed": true,
+					        "internalType": "uint256",
+					        "name": "tokenId",
+					        "type": "uint256"
+					      }
+					    ],
+					    "name": "Transfer",
+					    "type": "event"
+					  },
+					  {
+					    "inputs": [
+					      {
+					        "internalType": "uint256",
+					        "name": "",
+					        "type": "uint256"
+					      }
+					    ],
+					    "name": "MetadataUriList",
+					    "outputs": [
+					      {
+					        "internalType": "string",
+					        "name": "",
+					        "type": "string"
+					      }
+					    ],
+					    "stateMutability": "view",
+					    "type": "function"
+					  },
+					  {
+					    "inputs": [
+					      {
+					        "internalType": "address",
+					        "name": "to",
+					        "type": "address"
+					      },
+					      {
+					        "internalType": "uint256",
+					        "name": "tokenId",
+					        "type": "uint256"
+					      }
+					    ],
+					    "name": "approve",
+					    "outputs": [],
+					    "stateMutability": "nonpayable",
+					    "type": "function"
+					  },
+					  {
+					    "inputs": [
+					      {
+					        "internalType": "address",
+					        "name": "owner",
+					        "type": "address"
+					      }
+					    ],
+					    "name": "balanceOf",
+					    "outputs": [
+					      {
+					        "internalType": "uint256",
+					        "name": "",
+					        "type": "uint256"
+					      }
+					    ],
+					    "stateMutability": "view",
+					    "type": "function"
+					  },
+					  {
+					    "inputs": [
+					      {
+					        "internalType": "uint256",
+					        "name": "tokenId",
+					        "type": "uint256"
+					      }
+					    ],
+					    "name": "getApproved",
+					    "outputs": [
+					      {
+					        "internalType": "address",
+					        "name": "",
+					        "type": "address"
+					      }
+					    ],
+					    "stateMutability": "view",
+					    "type": "function"
+					  },
+					  {
+					    "inputs": [
+					      {
+					        "internalType": "address",
+					        "name": "owner",
+					        "type": "address"
+					      },
+					      {
+					        "internalType": "address",
+					        "name": "operator",
+					        "type": "address"
+					      }
+					    ],
+					    "name": "isApprovedForAll",
+					    "outputs": [
+					      {
+					        "internalType": "bool",
+					        "name": "",
+					        "type": "bool"
+					      }
+					    ],
+					    "stateMutability": "view",
+					    "type": "function"
+					  },
+					  {
+					    "inputs": [],
+					    "name": "name",
+					    "outputs": [
+					      {
+					        "internalType": "string",
+					        "name": "",
+					        "type": "string"
+					      }
+					    ],
+					    "stateMutability": "view",
+					    "type": "function"
+					  },
+					  {
+					    "inputs": [
+					      {
+					        "internalType": "uint256",
+					        "name": "tokenId",
+					        "type": "uint256"
+					      }
+					    ],
+					    "name": "ownerOf",
+					    "outputs": [
+					      {
+					        "internalType": "address",
+					        "name": "",
+					        "type": "address"
+					      }
+					    ],
+					    "stateMutability": "view",
+					    "type": "function"
+					  },
+					  {
+					    "inputs": [
+					      {
+					        "internalType": "address",
+					        "name": "to",
+					        "type": "address"
+					      },
+					      {
+					        "internalType": "string",
+					        "name": "metadataUri",
+					        "type": "string"
+					      }
+					    ],
+					    "name": "safeMint",
+					    "outputs": [],
+					    "stateMutability": "nonpayable",
+					    "type": "function"
+					  },
+					  {
+					    "inputs": [
+					      {
+					        "internalType": "address",
+					        "name": "from",
+					        "type": "address"
+					      },
+					      {
+					        "internalType": "address",
+					        "name": "to",
+					        "type": "address"
+					      },
+					      {
+					        "internalType": "uint256",
+					        "name": "tokenId",
+					        "type": "uint256"
+					      }
+					    ],
+					    "name": "safeTransferFrom",
+					    "outputs": [],
+					    "stateMutability": "nonpayable",
+					    "type": "function"
+					  },
+					  {
+					    "inputs": [
+					      {
+					        "internalType": "address",
+					        "name": "from",
+					        "type": "address"
+					      },
+					      {
+					        "internalType": "address",
+					        "name": "to",
+					        "type": "address"
+					      },
+					      {
+					        "internalType": "uint256",
+					        "name": "tokenId",
+					        "type": "uint256"
+					      },
+					      {
+					        "internalType": "bytes",
+					        "name": "_data",
+					        "type": "bytes"
+					      }
+					    ],
+					    "name": "safeTransferFrom",
+					    "outputs": [],
+					    "stateMutability": "nonpayable",
+					    "type": "function"
+					  },
+					  {
+					    "inputs": [
+					      {
+					        "internalType": "address",
+					        "name": "operator",
+					        "type": "address"
+					      },
+					      {
+					        "internalType": "bool",
+					        "name": "approved",
+					        "type": "bool"
+					      }
+					    ],
+					    "name": "setApprovalForAll",
+					    "outputs": [],
+					    "stateMutability": "nonpayable",
+					    "type": "function"
+					  },
+					  {
+					    "inputs": [
+					      {
+					        "internalType": "bytes4",
+					        "name": "interfaceId",
+					        "type": "bytes4"
+					      }
+					    ],
+					    "name": "supportsInterface",
+					    "outputs": [
+					      {
+					        "internalType": "bool",
+					        "name": "",
+					        "type": "bool"
+					      }
+					    ],
+					    "stateMutability": "view",
+					    "type": "function"
+					  },
+					  {
+					    "inputs": [],
+					    "name": "symbol",
+					    "outputs": [
+					      {
+					        "internalType": "string",
+					        "name": "",
+					        "type": "string"
+					      }
+					    ],
+					    "stateMutability": "view",
+					    "type": "function"
+					  },
+					  {
+					    "inputs": [],
+					    "name": "tokenIdCounter",
+					    "outputs": [
+					      {
+					        "internalType": "uint256",
+					        "name": "_value",
+					        "type": "uint256"
+					      }
+					    ],
+					    "stateMutability": "view",
+					    "type": "function"
+					  },
+					  {
+					    "inputs": [
+					      {
+					        "internalType": "uint256",
+					        "name": "tokenId",
+					        "type": "uint256"
+					      }
+					    ],
+					    "name": "tokenURI",
+					    "outputs": [
+					      {
+					        "internalType": "string",
+					        "name": "",
+					        "type": "string"
+					      }
+					    ],
+					    "stateMutability": "view",
+					    "type": "function"
+					  },
+					  {
+					    "inputs": [
+					      {
+					        "internalType": "address",
+					        "name": "from",
+					        "type": "address"
+					      },
+					      {
+					        "internalType": "address",
+					        "name": "to",
+					        "type": "address"
+					      },
+					      {
+					        "internalType": "uint256",
+					        "name": "tokenId",
+					        "type": "uint256"
+					      }
+					    ],
+					    "name": "transferFrom",
+					    "outputs": [],
+					    "stateMutability": "nonpayable",
+					    "type": "function"
+					  },
+					  {
+					    "inputs": [
+					      {
+					        "internalType": "uint256",
+					        "name": "tokenId",
+					        "type": "uint256"
+					      },
+					      {
+					        "internalType": "string",
+					        "name": "metadataUri",
+					        "type": "string"
+					      }
+					    ],
+					    "name": "updateTokenURI",
+					    "outputs": [],
+					    "stateMutability": "nonpayable",
+					    "type": "function"
+					  }
+					]
+					        
+        ;
+        
+        // Elementos DOM
+        const imageInput = document.getElementById('nft-image');
+        const imagePreview = document.getElementById('image-preview');
+        const noPreview = document.getElementById('no-preview');
+        const uploadBtn = document.getElementById('upload-btn');
+        const createMetadataBtn = document.getElementById('create-metadata-btn');
+        const loading = document.getElementById('loading');
+        const loadingText = document.getElementById('loading-text');
+        const alertsContainer = document.getElementById('alerts-container');
+        const attributesContainer = document.getElementById('attributes-container');
+        const debugInfo = document.getElementById('debug-info');
+        const toggleDebugBtn = document.getElementById('toggle-debug');
+        const analysisSection = document.getElementById('analysis-section');
+        const sentimentAnalysis = document.getElementById('sentiment-analysis');
+        const colorPsychology = document.getElementById('color-psychology');
+        const symbolRelation = document.getElementById('symbol-relation');
+        const visualLanguage = document.getElementById('visual-language');
+        const keywordsContainer = document.getElementById('keywords-container');
+        const metadataResult = document.getElementById('metadata-result');
+        const metadataIpfsHash = document.getElementById('metadata-ipfs-hash');
+        const metadataIpfsLink = document.getElementById('metadata-ipfs-link');
+        const metadataJson = document.getElementById('metadata-json');
+        const mintSection = document.getElementById('mint-section');
+        const contractAddress = document.getElementById('contract-address');
+        const contractAbi = document.getElementById('contract-abi');
+        const formatAbiBtn = document.getElementById('format-abi-btn');
+        const restoreDefaultAbiBtn = document.getElementById('restore-default-abi-btn');
+        const connectWalletBtn = document.getElementById('connect-wallet-btn');
+        const walletStatus = document.getElementById('wallet-status');
+        const walletAddressElement = document.getElementById('wallet-address');
+        const walletBalance = document.getElementById('wallet-balance');
+        const networkNameElement = document.getElementById('network-name');
+        const mintResult = document.getElementById('mint-result');
+        const transactionHash = document.getElementById('transaction-hash');
+        const transactionLink = document.getElementById('transaction-link');
+
+					// Opcional: desabilitar os campos
+					//  document.getElementById('contract-address').readOnly = true;
+					// document.getElementById('defaultAbi').readOnly = true;
+        
+        
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            logDebug('Página carregada, iniciando aplicação');
+            
+            // Configuração inicial do painel de depuração
+            toggleDebugBtn.addEventListener('click', () => {
+                debugInfo.style.display = debugInfo.style.display === 'none' ? 'block' : 'none';
+                logDebug('Painel de depuração ' + (debugInfo.style.display === 'none' ? 'ocultado' : 'exibido'));
+            });
+            
+            // Inicializa o ABI padrão
+            contractAbi.value = JSON.stringify(defaultAbi, null, 2);
+            
+            // Configurar event listeners
+            setupEventListeners();
+            
+            // Verifica se o MetaMask está instalado
+            checkMetaMaskInstallation();
+        });
+
+        function setupEventListeners() {
+            logDebug('Configurando event listeners da interface');
+            
+            // Input de imagem
+            imageInput.addEventListener('change', handleImageSelect);
+            
+            // Botão de upload
+            uploadBtn.addEventListener('click', uploadAndAnalyzeImage);
+            
+            // Botão de criar metadados e mintar
+            createMetadataBtn.addEventListener('click', createMetadataAndMint);
+            
+            // Botão de conectar carteira
+            connectWalletBtn.addEventListener('click', connectWallet);
+            
+            // Botões de ABI
+            formatAbiBtn.addEventListener('click', formatAbi);
+            restoreDefaultAbiBtn.addEventListener('click', restoreDefaultAbi);
+        }
+
+        function handleImageSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                logDebug(`Imagem selecionada: ${file.name}, tamanho: ${(file.size / 1024).toFixed(2)} KB, tipo: ${file.type}`);
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    noPreview.style.display = 'none';
+                    logDebug('Preview da imagem carregado');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.style.display = 'none';
+                noPreview.style.display = 'block';
+                logDebug('Nenhuma imagem selecionada');
+            }
+        }
+
+
+// --------------------- INICIO  carteira MetaMask
+
+        function checkMetaMaskInstallation() {
+            if (typeof window.ethereum !== 'undefined') {
+                logDebug('MetaMask detectado');
+                
+                // Configura listeners para eventos do MetaMask
+                window.ethereum.on('accountsChanged', handleAccountsChanged);
+                window.ethereum.on('chainChanged', handleChainChanged);
+                
+                // Tenta conectar automaticamente se já autorizado
+                if (window.ethereum.isConnected()) {
+                    connectWallet();
+                }
+            } else {
+              
+                /*
+                logDebug('MetaMask não encontrado');
+                showAlert('MetaMask não encontrado. Por favor instale a extensão MetaMask para usar este aplicativo.', 'warning');
+                
+                // Verifica se é um dispositivo móvel
+                if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                    logDebug('Dispositivo móvel detectado');
+                    showMobileMetaMaskInstructions();
+                }
+                */
+           
+								logDebug('MetaMask não encontrado');
+								    
+								    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+								        logDebug('Dispositivo móvel detectado');
+
+								        // Redireciona para MetaMask Mobile se estiver em celular
+								        //const dappUrl = "seu-site.render.com"; // seu domínio aqui, sem https://
+								        const dappUrl = "https://nft-bnb-mintar.onrender.com"; // seu domínio aqui, sem https://
+								       
+								        const metamaskAppDeepLink = `https://metamask.app.link/dapp/${dappUrl}`;
+								        
+								        showAlert('Abrindo MetaMask Mobile...', 'info');
+								        window.location.href = metamaskAppDeepLink;
+								    } else {
+								        showAlert('MetaMask não encontrado. Por favor instale a extensão MetaMask para usar este aplicativo.', 'warning');
+								    }           
+           
+           
+            }
+        }
+
+// --------------------- FIM  carteira MetaMask
+
+
+        function showMobileMetaMaskInstructions() {
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-info';
+            alert.innerHTML = `
+                <h5>Usando em dispositivo móvel?</h5>
+                <p>Para usar este aplicativo em um dispositivo móvel:</p>
+                <ol>
+                    <li>Instale o aplicativo MetaMask no seu dispositivo</li>
+                    <li>Abra o navegador interno do MetaMask</li>
+                    <li>Acesse este aplicativo através do navegador do MetaMask</li>
+                </ol>
+                <a href="https://metamask.app.link/" class="btn btn-primary btn-sm" target="_blank">Abrir no MetaMask</a>
+            `;
+            alertsContainer.appendChild(alert);
+        }
+
+
+
+
+        async function connectWallet() {
+            logDebug('Tentando conectar à carteira MetaMask...');
+            
+            if (typeof window.ethereum === 'undefined') {
+                showAlert('MetaMask não encontrado. Por favor instale a extensão MetaMask.', 'danger');
+                logDebug('MetaMask não encontrado');
+                return;
+            }
+            
+            try {
+                // Inicializa o provider
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                logDebug('Provider Ethers.js inicializado');
+                
+                // Solicita acesso às contas
+                logDebug('Solicitando acesso às contas...');
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                handleAccountsChanged(accounts);
+                
+                // Exibe a seção de mintagem
+                mintSection.style.display = 'block';
+                
+            } catch (error) {
+                console.error('Erro ao conectar com MetaMask:', error);
+                logDebug(`Erro ao conectar com MetaMask: ${error.message}`);
+                showAlert(`Erro ao conectar com MetaMask: ${error.message}`, 'danger');
+            }
+        }
+
+        async function handleAccountsChanged(accounts) {
+            logDebug(`Evento accountsChanged detectado: ${accounts}`);
+            
+            if (accounts.length === 0) {
+                // Usuário desconectou a conta
+                logDebug('Nenhuma conta conectada');
+                walletAddress = null;
+                walletStatus.textContent = 'Desconectado';
+                walletAddressElement.textContent = 'Não conectado';
+                walletBalance.textContent = '0 ETH';
+                networkNameElement.textContent = 'Não detectada';
+                
+                // Oculta a seção de mintagem
+                mintSection.style.display = 'none';
+                
+                showAlert('Carteira desconectada. Conecte sua carteira para continuar.', 'warning');
+            } else {
+                // Usuário conectou ou mudou de conta
+                logDebug(`Mudança de contas detectada: ${accounts[0]}`);
+                walletAddress = accounts[0];
+                walletStatus.textContent = 'Conectado';
+                walletAddressElement.textContent = walletAddress;
+                
+                // Atualiza o saldo e a rede
+                updateWalletInfo();
+                
+                // Exibe a seção de mintagem
+                mintSection.style.display = 'block';
+            }
+        }
+
+        async function handleChainChanged(chainId) {
+            logDebug(`Evento chainChanged detectado: ${chainId}`);
+            // Recarrega a página quando a rede muda
+            window.location.reload();
+        }
+
+        async function updateWalletInfo() {
+            if (!provider || !walletAddress) return;
+            
+            try {
+                logDebug(`Obtendo saldo para a conta: ${walletAddress}`);
+                const balance = await provider.getBalance(walletAddress);
+                const formattedBalance = ethers.utils.formatEther(balance);
+                walletBalance.textContent = `${parseFloat(formattedBalance).toFixed(4)} ETH`;
+                
+                logDebug('Obtendo informações da rede...');
+                const network = await provider.getNetwork();
+                
+                 // 20250526 -  INCLUIR - Sepolia Testnet e BNB Smart Chain Testnet
+                // Mapeamento de IDs de rede para nomes
+                const networkMap = {
+                    1: 'Ethereum Mainnet',
+                    3: 'Ropsten Testnet',
+                    4: 'Rinkeby Testnet',
+                    5: 'Goerli Testnet',
+                    42: 'Kovan Testnet',
+                    56: 'Binance Smart Chain',
+                    137: 'Polygon Mainnet',
+                    80001: 'Mumbai Testnet',
+                    43114: 'Avalanche Mainnet',
+                    43113: 'Avalanche Fuji Testnet',
+                    11155111: 'Sepolia Testnet',
+										97: 'BNB Smart Chain Testnet'
+								        	
+                };
+                
+                // 20250526 - Garanta que network.chainId seja convertido para número: para busca da Rede
+                const chainId = Number(network.chainId);
+								networkName = networkMap[chainId] || `Rede ${chainId}`;
+                
+                //networkName = networkMap[network.chainId] || `Rede ${network.chainId}`;
+               
+                networkNameElement.textContent = networkName;
+                
+                logDebug(`Rede detectada: ${networkName} (${network.chainId})`);
+                logDebug(network.chainId);
+                
+            } catch (error) {
+                console.error('Erro ao atualizar informações da carteira:', error);
+                logDebug(`Erro ao atualizar informações da carteira: ${error.message}`);
+            }
+        }
+
+        async function uploadAndAnalyzeImage() {
+            if (!imageInput.files[0]) {
+                showAlert('Por favor, selecione uma imagem para upload.', 'warning');
+                logDebug('Tentativa de upload sem selecionar imagem');
+                return;
+            }
+            
+            const nftName = document.getElementById('nft-name').value;
+            const nftDescription = document.getElementById('nft-description').value;
+            
+            if (!nftName || !nftDescription) {
+                showAlert('Por favor, preencha o nome e a descrição básica do NFT.', 'warning');
+                logDebug('Tentativa de upload sem preencher nome ou descrição');
+                return;
+            }
+            
+            showLoading('Fazendo upload da imagem para o IPFS...');
+            logDebug('Iniciando upload para IPFS');
+            
+            try {
+                // Upload da imagem para o IPFS via Pinata
+                const formData = new FormData();
+                formData.append('file', imageInput.files[0]);
+                
+                logDebug('Enviando requisição para /api/upload');
+                const imageResponse = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const responseText = await imageResponse.text();
+                logDebug(`Resposta do servidor (status ${imageResponse.status}): ${responseText}`);
+                
+                if (!imageResponse.ok) {
+                    let errorData;
+                    try {
+                        errorData = JSON.parse(responseText);
+                    } catch (e) {
+                        errorData = { error: 'Erro ao processar resposta do servidor' };
+                    }
+                    throw new Error(errorData.error || 'Erro ao fazer upload da imagem');
+                }
+                
+                const imageData = JSON.parse(responseText);
+                imageIpfsHash = imageData.IpfsHash;
+                logDebug(`Hash IPFS da imagem: ${imageIpfsHash}`);
+                
+                // Agora que temos o hash IPFS, vamos analisar a imagem
+                showLoading('Analisando imagem com IA...');
+                
+                logDebug('Enviando requisição para /api/analyze-image');
+                const analysisResponse = await fetch('/api/analyze-image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        image_hash: imageIpfsHash
+                    })
+                });
+                
+                const analysisResponseText = await analysisResponse.text();
+                logDebug(`Resposta da análise (status ${analysisResponse.status}): ${analysisResponseText.substring(0, 200)}...`);
+                
+                if (!analysisResponse.ok) {
+                    let errorData;
+                    try {
+                        errorData = JSON.parse(analysisResponseText);
+                    } catch (e) {
+                        errorData = { error: 'Erro ao processar resposta da análise' };
+                    }
+                    throw new Error(errorData.error || 'Erro ao analisar imagem');
+                }
+                
+                // Armazena a análise e atualiza a UI
+                imageAnalysis = JSON.parse(analysisResponseText);
+                updateAnalysisUI(imageAnalysis);
+                
+                // Habilita o botão de criar metadados
+                createMetadataBtn.disabled = false;
+                hideLoading();
+                showAlert('Imagem analisada com sucesso! Agora você pode criar os metadados e mintar o NFT.', 'success');
+                
+            } catch (error) {
+                hideLoading();
+                console.error('Erro:', error);
+                logDebug(`Erro durante upload ou análise: ${error.message}`);
+                showAlert('Erro: ' + error.message, 'danger');
+            }
+        }
+
+        function updateAnalysisUI(analysis) {
+            logDebug('Atualizando UI com a análise da imagem');
+            
+            // Exibe a seção de análise
+            analysisSection.style.display = 'block';
+            
+            // Preenche os campos de análise
+            sentimentAnalysis.textContent = analysis.sentiment_analysis || 'Não disponível';
+            colorPsychology.textContent = analysis.color_psychology || 'Não disponível';
+            //zodiacRelation.textContent = analysis.zodiac_relation || 'Não disponível';
+            symbolRelation.textContent = analysis.symbol_relation || 'Não disponível'; // mudou aqui
+            visualLanguage.textContent = analysis.visual_language || 'Não disponível';
+            
+            // Limpa e preenche as palavras-chave
+            keywordsContainer.innerHTML = '';
+            if (analysis.keywords && analysis.keywords.length > 0) {
+                analysis.keywords.forEach(keyword => {
+                    const keywordBadge = document.createElement('span');
+                    keywordBadge.className = 'keyword-badge';
+                    keywordBadge.textContent = keyword;
+                    keywordsContainer.appendChild(keywordBadge);
+                });
+            } else {
+                keywordsContainer.textContent = 'Nenhuma palavra-chave disponível';
+            }
+            
+            // Limpa e preenche os atributos
+            attributesContainer.innerHTML = '';
+            if (analysis.attributes && analysis.attributes.length > 0) {
+                analysis.attributes.forEach(attr => {
+                    const attrBadge = document.createElement('span');
+                    attrBadge.className = 'attribute-badge';
+                    attrBadge.innerHTML = `<span class="trait-type">${attr.trait_type}:</span> ${attr.value}`;
+                    attributesContainer.appendChild(attrBadge);
+                });
+            } else {
+                attributesContainer.textContent = 'Nenhum atributo disponível';
+            }
+            
+            logDebug('UI de análise atualizada com sucesso');
+        }
+
+        async function createMetadataAndMint() {
+            if (!imageIpfsHash || !imageAnalysis) {
+                showAlert('Por favor, faça o upload e análise da imagem primeiro.', 'warning');
+                logDebug('Tentativa de criar metadados sem hash de imagem ou análise');
+                return;
+            }
+            
+            const nftName = document.getElementById('nft-name').value;
+            const nftDescription = document.getElementById('nft-description').value;
+            
+            if (!nftName || !nftDescription) {
+                showAlert('Por favor, preencha o nome e a descrição básica do NFT.', 'warning');
+                logDebug('Tentativa de criar metadados sem preencher nome ou descrição');
+                return;
+            }
+            
+            // Verifica se a carteira está conectada
+            if (!walletAddress) {
+                showAlert('Por favor, conecte sua carteira MetaMask primeiro.', 'warning');
+                logDebug('Tentativa de criar metadados sem conectar carteira');
+                return;
+            }
+            
+            showLoading('Criando metadados enriquecidos...');
+            
+            try {
+                // Criar metadados com a análise
+                logDebug('Enviando requisição para /api/create-metadata-only');
+                const metadataResponse = await fetch('/api/create-metadata-only', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: nftName,
+                        description: nftDescription,
+                        image: imageIpfsHash,
+                        image_analysis: imageAnalysis
+                    })
+                });
+                
+                const metadataResponseText = await metadataResponse.text();
+                logDebug(`Resposta do servidor para metadados (status ${metadataResponse.status}): ${metadataResponseText.substring(0, 200)}...`);
+                
+                if (!metadataResponse.ok) {
+                    let errorData;
+                    try {
+                        errorData = JSON.parse(metadataResponseText);
+                    } catch (e) {
+                        errorData = { error: 'Erro ao processar resposta do servidor para metadados' };
+                    }
+                    throw new Error(errorData.error || 'Erro ao criar metadados');
+                }
+                
+                const metadataData = JSON.parse(metadataResponseText);
+                metadataIpfsHashValue = metadataData.IpfsHash;
+                logDebug(`Hash IPFS dos metadados: ${metadataIpfsHashValue}`);
+                
+                // Exibir os resultados dos metadados
+                metadataIpfsHash.textContent = metadataIpfsHashValue;
+                metadataIpfsLink.href = `https://ipfs.io/ipfs/${metadataIpfsHashValue}`;
+                
+                // Formatar e exibir o JSON dos metadados
+                if (metadataData.metadata) {
+                    metadataJson.textContent = JSON.stringify(metadataData.metadata, null, 2);
+                } else {
+                    metadataJson.textContent = "Metadados criados com sucesso, mas o conteúdo não está disponível para visualização.";
+                }
+                
+                // Exibir a seção de resultados dos metadados
+                metadataResult.style.display = 'block';
+                
+                showLoading('Mintando NFT...');
+                
+                // Agora vamos mintar o NFT
+                await mintNFT(metadataIpfsHashValue);
+                
+                hideLoading();
+                
+                // Rolar para a seção de resultados
+                mintResult.scrollIntoView({ behavior: 'smooth' });
+                
+            } catch (error) {
+                hideLoading();
+                console.error('Erro ao criar metadados ou mintar NFT:', error);
+                logDebug(`Erro ao criar metadados ou mintar NFT: ${error.message}`);
+                showAlert('Erro: ' + error.message, 'danger');
+            }
+        }
+
+        async function mintNFT(tokenURI) {
+            if (!provider || !walletAddress) {
+                throw new Error('Carteira não conectada');
+            }
+            
+            const contractAddressValue = contractAddress.value;
+            if (!contractAddressValue || !ethers.utils.isAddress(contractAddressValue)) {
+                throw new Error('Endereço de contrato inválido');
+            }
+            
+            // Lê o ABI do contrato
+            let contractAbiValue;
+            try {
+                logDebug('ABI do contrato lido com sucesso');
+                contractAbiValue = JSON.parse(contractAbi.value);
+            } catch (error) {
+                logDebug(`Erro ao parsear ABI: ${error.message}`);
+                throw new Error('Erro ao ler o ABI do contrato. Verifique o formato JSON.');
+            }
+            
+            // Inicializa o signer
+            signer = provider.getSigner();
+            
+            // Inicializa o contrato
+            const nftContract = new ethers.Contract(contractAddressValue, contractAbiValue, signer);
+            
+            // Formata o tokenURI para o formato correto (ipfs://)
+            const formattedTokenURI = `ipfs://${tokenURI}`;
+            
+            logDebug(`Iniciando mint para contrato: ${contractAddressValue}, tokenURI: ${formattedTokenURI}`);
+            
+            // Tenta diferentes funções de mint
+            try {
+                logDebug('Tentando função mint()');
+                const tx = await nftContract.mint(walletAddress, formattedTokenURI);
+                return await processMintTransaction(tx);
+            } catch (error) {
+                logDebug(`Erro na função mint(): ${error.message}`);
+                
+                try {
+                    logDebug('Tentando função safeMint()');
+                    const tx = await nftContract.safeMint(walletAddress, formattedTokenURI);
+                    return await processMintTransaction(tx);
+                } catch (error) {
+                    logDebug(`Erro na função safeMint(): ${error.message}`);
+                    
+                    try {
+                        logDebug('Tentando função mintNFT()');
+                        const tx = await nftContract.mintNFT(walletAddress, formattedTokenURI);
+                        return await processMintTransaction(tx);
+                    } catch (error) {
+                        logDebug(`Erro na função mintNFT(): ${error.message}`);
+                        throw new Error('Nenhuma função de mint (mint, safeMint, mintNFT) encontrada ou falhou ao chamar.');
+                    }
+                }
+            }
+        }
+
+        async function processMintTransaction(tx) {
+            logDebug(`Transação enviada: ${tx.hash}`);
+            showAlert(`Transação enviada: ${tx.hash}`, 'info');
+            
+            // Aguarda a confirmação da transação
+            showLoading('Aguardando confirmação da transação...');
+            const receipt = await tx.wait();
+            logDebug(`Transação confirmada: ${receipt.transactionHash}`);
+            
+            // Exibe os resultados da mintagem
+            transactionHash.textContent = receipt.transactionHash;
+            
+            // Define o link para o explorador de blocos com base na rede
+            let explorerUrl;
+            if (provider.network.chainId === 1) {
+                explorerUrl = `https://etherscan.io/tx/${receipt.transactionHash}`;
+            } else if (provider.network.chainId === 3) {
+                explorerUrl = `https://ropsten.etherscan.io/tx/${receipt.transactionHash}`;
+            } else if (provider.network.chainId === 4) {
+                explorerUrl = `https://rinkeby.etherscan.io/tx/${receipt.transactionHash}`;
+            } else if (provider.network.chainId === 5) {
+                explorerUrl = `https://goerli.etherscan.io/tx/${receipt.transactionHash}`;
+            } else if (provider.network.chainId === 42) {
+                explorerUrl = `https://kovan.etherscan.io/tx/${receipt.transactionHash}`;
+            } else if (provider.network.chainId === 56) {
+                explorerUrl = `https://bscscan.com/tx/${receipt.transactionHash}`;
+            } else if (provider.network.chainId === 137) {
+                explorerUrl = `https://polygonscan.com/tx/${receipt.transactionHash}`;
+
+            // 20250526 - CADASTRO SCAN - eth-sepolia.blockscout.com / BNB Chain
+            } else if (provider.network.chainId === 11155111) {
+                explorerUrl = `https://eth-sepolia.blockscout.com/tx/${receipt.transactionHash}`;
+            } else if (provider.network.chainId === 97) {
+                explorerUrl = `https://testnet.bscscan.com/tx/${receipt.transactionHash}`;
+    
+                
+            } else if (provider.network.chainId === 80001) {
+                explorerUrl = `https://mumbai.polygonscan.com/tx/${receipt.transactionHash}`;
+            } else {
+                explorerUrl = `https://etherscan.io/tx/${receipt.transactionHash}`;
+            }
+            
+            transactionLink.href = explorerUrl;
+            
+            // Exibe a seção de resultados da mintagem
+            mintResult.style.display = 'block';
+            
+            showAlert('NFT mintado com sucesso!', 'success');
+            
+            return receipt;
+        }
+
+        function formatAbi() {
+            try {
+                // Tenta parsear o ABI atual
+                let abiValue = contractAbi.value.trim();
+                
+                // Verifica se o ABI está em formato de string
+                if (abiValue.startsWith('"') && abiValue.endsWith('"')) {
+                    abiValue = JSON.parse(abiValue);
+                }
+                
+                // Tenta parsear como JSON
+                let parsedAbi;
+                try {
+                    parsedAbi = JSON.parse(abiValue);
+                } catch (e) {
+                    // Tenta corrigir problemas comuns
+                    // Substitui True/False por true/false
+                    abiValue = abiValue.replace(/True/g, 'true').replace(/False/g, 'false');
+                    // Substitui aspas simples por aspas duplas
+                    abiValue = abiValue.replace(/'/g, '"');
+                    
+                    try {
+                        parsedAbi = JSON.parse(abiValue);
+                    } catch (e2) {
+                        throw new Error('Não foi possível parsear o ABI. Verifique o formato JSON.');
+                    }
+                }
+                
+                // Formata o ABI com indentação
+                contractAbi.value = JSON.stringify(parsedAbi, null, 2);
+                logDebug('ABI formatado com sucesso');
+                
+            } catch (error) {
+                console.error('Erro ao formatar ABI:', error);
+                logDebug(`Erro ao formatar ABI: ${error.message}`);
+                showAlert(`Erro ao formatar ABI: ${error.message}`, 'danger');
+            }
+        }
+
+        function restoreDefaultAbi() {
+            contractAbi.value = JSON.stringify(defaultAbi, null, 2);
+            logDebug('ABI padrão restaurado');
+        }
+
+        function toggleAbiSection() {
+            const abiSection = document.getElementById('abi-section');
+            if (abiSection.style.display === 'none' || !abiSection.style.display) {
+                abiSection.style.display = 'block';
+                logDebug('Seção de ABI expandida');
+            } else {
+                abiSection.style.display = 'none';
+                logDebug('Seção de ABI recolhida');
+            }
+        }
+
+        function showLoading(message) {
+            loading.style.display = 'block';
+            loadingText.textContent = message || 'Processando...';
+            uploadBtn.disabled = true;
+            createMetadataBtn.disabled = true;
+            logDebug(`Loading exibido: ${message}`);
+        }
+
+        function hideLoading() {
+            loading.style.display = 'none';
+            uploadBtn.disabled = false;
+            createMetadataBtn.disabled = imageIpfsHash && imageAnalysis ? false : true;
+            logDebug('Loading ocultado');
+        }
+
+        function showAlert(message, type) {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+            `;
+            
+            alertsContainer.appendChild(alert);
+            logDebug(`Alerta exibido (${type}): ${message}`);
+            
+            // Remove o alerta após 5 segundos
+            setTimeout(() => {
+                alert.classList.remove('show');
+                setTimeout(() => {
+                    if (alertsContainer.contains(alert)) {
+                        alertsContainer.removeChild(alert);
+                        logDebug('Alerta removido');
+                    }
+                }, 150);
+            }, 5000);
+        }
+        
+        function logDebug(message) {
+            const timestamp = new Date().toISOString();
+            console.log(`[DEBUG] ${timestamp}: ${message}`);
+            
+            const logEntry = document.createElement('div');
+            logEntry.textContent = `${timestamp}: ${message}`;
+            // Adiciona no início para ver os logs mais recentes primeiro
+            debugInfo.insertBefore(logEntry, debugInfo.firstChild);
+            
+            // Limita o número de entradas de log para evitar sobrecarga
+            while (debugInfo.children.length > 100) {
+                debugInfo.removeChild(debugInfo.lastChild);
+            }
+        }
+    </script>
+</body>
+</html>

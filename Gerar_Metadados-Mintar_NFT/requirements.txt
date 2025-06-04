@@ -1,0 +1,7 @@
+Flask==2.2.3
+requests==2.28.2
+python-dotenv==1.0.0
+Werkzeug==2.2.3
+python-multipart==0.0.6
+openai==0.28
+gunicorn==20.1.0
